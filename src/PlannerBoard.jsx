@@ -130,28 +130,6 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, pla
           }}
           className="bg-purple-600 text-white px-4 py-2 rounded shadow"
         >
-<button
-  onClick={() => {
-    ["planning", "medewerkers", "beschikbaarheid", "loonkosten"].forEach((key) => {
-      const data = localStorage.getItem(key);
-      if (data) {
-        const blob = new Blob([data], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${key}.json`;
-        a.click();
-      } else {
-        console.warn(`Geen data gevonden voor '${key}'`);
-      }
-    });
-  }}
-  className="bg-blue-500 text-white px-4 py-2 rounded"
->
-  📥 Exporteer lokale data
-</button>
-
-
 
           Download planning
         </button>
