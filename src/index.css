@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+.has-opmerking {
+  position: relative;
+  background-color: #ffe4e6; /* lichtroze als debug */
+}
+
+.has-opmerking::after {
+  content: "📌";
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  font-size: 16px;
+  z-index: 100;
+}
