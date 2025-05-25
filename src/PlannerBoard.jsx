@@ -80,7 +80,6 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, pla
 
 const SUPABASE_STORAGE_URL = "https://yknympukfnazpvoxufwd.supabase.co/storage/v1/object";
 const SUPABASE_BUCKET = "plannerdata";
-const SUPABASE_API_KEY = import.meta.env.VITE_SUPABASE_API_KEY;
 
 
 
