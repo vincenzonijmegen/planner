@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   SUPABASE_PROJECT_URL,
-  SUPABASE_API_KEY
+  
 } from "./config";
 import {
   getShiftCountPerMedewerker,
