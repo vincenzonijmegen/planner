@@ -2,7 +2,6 @@ console.log("🚀 PlannerBoard geladen");
 
 import React, { useState, useEffect } from "react";
 import {
-  SUPABASE_API_KEY,
   getSupabaseUploadUrl
 } from "./config";
 import {
@@ -13,6 +12,8 @@ import {
 import { dagMap } from "./utils/dagen";
 import { exportToPDF } from "./utils/exportToPDF";
 import { kleurSchema } from "./utils/kleurSchema";
+
+const SUPABASE_API_KEY = import.meta.env.VITE_SUPABASE_API_KEY;
 
 export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaarheidProp, planning, setPlanning, onTotalLoonkostenChange }) {
   const [popup, setPopup] = useState(null);
@@ -64,7 +65,7 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
         })}
 
         {/* Upload knoppen */}
-        {['planning.json', 'beschikbaarheid.json', 'medewerkers.json'].map((filename) => (
+        {["planning.json", "beschikbaarheid.json", "medewerkers.json"].map((filename) => (
           <label key={filename} className="bg-green-600 text-white px-4 py-2 rounded shadow cursor-pointer">
             Upload {filename}
             <input
@@ -77,7 +78,7 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
         ))}
 
         {/* Download knoppen */}
-        {['planning.json', 'beschikbaarheid.json', 'medewerkers.json'].map((filename) => (
+        {["planning.json", "beschikbaarheid.json", "medewerkers.json"].map((filename) => (
           <button
             key={filename}
             onClick={() => downloadJSON(filename)}
