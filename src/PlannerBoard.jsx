@@ -2,7 +2,8 @@ console.log("🚀 PlannerBoard geladen");
 
 import React, { useState, useEffect } from "react";
 import {
-  getSupabaseUploadUrl
+  SUPABASE_API_KEY,
+  SUPABASE_PUBLIC_BASE
 } from "./config";
 import {
   getShiftCountPerMedewerker,
@@ -13,8 +14,6 @@ import { dagMap } from "./utils/dagen";
 import { exportToPDF } from "./utils/exportToPDF";
 import { kleurSchema } from "./utils/kleurSchema";
 
-
-
 export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaarheidProp, planning, setPlanning, onTotalLoonkostenChange }) {
   const [popup, setPopup] = useState(null);
   const [localBeschikbaarheid, setLocalBeschikbaarheid] = useState(beschikbaarheidProp);
@@ -24,7 +23,7 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
     const reader = new FileReader();
     reader.onload = async (evt) => {
       const blob = new Blob([evt.target.result], { type: "application/json" });
-      const response = await fetch(getSupabaseUploadUrl(targetFileName), {
+      const response = await fetch(`${SUPABASE_PUBLIC_BASE}/${targetFileName}`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${SUPABASE_API_KEY}`,
@@ -41,7 +40,7 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
 
   const downloadJSON = async (filename) => {
     try {
-      const res = await fetch(getSupabaseUploadUrl(filename));
+      const res = await fetch(`${SUPABASE_PUBLIC_BASE}/${filename}`);
       if (!res.ok) throw new Error("Bestand niet gevonden");
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
