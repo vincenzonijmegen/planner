@@ -25,7 +25,7 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
       const response = await fetch(`${SUPABASE_PUBLIC_BASE}/${targetFileName}`, {
         method: "PUT",
         headers: {
-          Authorization: `Bearer ${SUPABASE_API_KEY}`,
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_API_KEY}`,
           "Content-Type": "application/json",
           "x-upsert": "true"
         },
@@ -58,7 +58,7 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
     <div className="p-4 bg-gray-100">
       <div className="flex flex-wrap gap-2 items-center mb-4">
         {importeerBeschikbaarheidKnop(setLocalBeschikbaarheid)}
-        {React.cloneElement(importeerLoonkostenKnop(() => {}), {
+        {React.cloneElement(importeerLoonkostenKnop((loonkosten) => { console.log("Loonkosten ontvangen:", loonkosten); }), {
           className: "bg-blue-600 text-white px-4 py-2 rounded shadow"
         })}
 
