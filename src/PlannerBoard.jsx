@@ -36,7 +36,7 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
         alert("Upload mislukt: API key ontbreekt.");
         return;
       }
-      }
+      
 
       const response = await fetch(`${SUPABASE_PUBLIC_BASE}/${targetFileName}`, {
         method: "PUT",
