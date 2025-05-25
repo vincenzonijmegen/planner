@@ -1,10 +1,7 @@
-console.log("🚀 PlannerBoard geladen");
-
 import React, { useState, useEffect } from "react";
 import {
   SUPABASE_PUBLIC_BASE,
-  SUPABASE_API_KEY
-} from "./config";
+  } from "./config";
 import {
   getShiftCountPerMedewerker,
   importeerBeschikbaarheidKnop,
