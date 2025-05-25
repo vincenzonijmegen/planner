@@ -21,7 +21,14 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
   const uploadJSON = async (file, targetFileName) => {
     const reader = new FileReader();
     reader.onload = async (evt) => {
-      const blob = new Blob([evt.target.result], { type: "application/json" });
+      let json;
+      try {
+        json = JSON.parse(evt.target.result);
+      } catch (e) {
+        alert("Ongeldige JSON: bestand kon niet geparsed worden.");
+        return;
+      }
+      const blob = new Blob([JSON.stringify(json)], { type: "application/json" });
       const SUPABASE_PUBLIC_BASE = `${SUPABASE_PROJECT_URL}/storage/v1/object/public/plannerdata`;
       const response = await fetch(`${SUPABASE_PUBLIC_BASE}/${targetFileName}`, {
         method: "PUT",
