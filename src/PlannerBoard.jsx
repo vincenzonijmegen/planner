@@ -13,7 +13,7 @@ import { dagMap } from "./utils/dagen";
 import { exportToPDF } from "./utils/exportToPDF";
 import { kleurSchema } from "./utils/kleurSchema";
 
-const SUPABASE_API_KEY = import.meta.env.VITE_SUPABASE_API_KEY;
+
 
 export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaarheidProp, planning, setPlanning, onTotalLoonkostenChange }) {
   const [popup, setPopup] = useState(null);
