@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   SUPABASE_PROJECT_URL,
-  
+  SUPABASE_API_KEY
 } from "./config";
 import {
   getShiftCountPerMedewerker,
@@ -31,7 +31,7 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
       const blob = new Blob([JSON.stringify(json)], { type: "application/json" });
       const SUPABASE_PUBLIC_BASE = `${SUPABASE_PROJECT_URL}/storage/v1/object/public/plannerdata`;
 
-      const key = import.meta.env.VITE_SUPABASE_API_KEY;
+      const key = SUPABASE_API_KEY;
       if (!key) {
         console.error("❌ VITE_SUPABASE_API_KEY ontbreekt of import.meta.env is niet beschikbaar.");
         alert("Upload mislukt: API key niet beschikbaar.");
