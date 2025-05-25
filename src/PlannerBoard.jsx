@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import {
-  SUPABASE_PUBLIC_BASE,
-  } from "./config";
+  SUPABASE_PROJECT_URL,
+  SUPABASE_BUCKET,
+  SUPABASE_API_KEY
+} from "./config";
 import {
   getShiftCountPerMedewerker,
   importeerBeschikbaarheidKnop,
@@ -10,6 +12,8 @@ import {
 import { dagMap } from "./utils/dagen";
 import { exportToPDF } from "./utils/exportToPDF";
 import { kleurSchema } from "./utils/kleurSchema";
+
+const SUPABASE_PUBLIC_BASE = `${SUPABASE_PROJECT_URL}/storage/v1/object/public/${SUPABASE_BUCKET}`;
 
 export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaarheidProp, planning, setPlanning, onTotalLoonkostenChange }) {
   const [popup, setPopup] = useState(null);
