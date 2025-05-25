@@ -30,24 +30,18 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
       }
       const blob = new Blob([JSON.stringify(json)], { type: "application/json" });
       const SUPABASE_PUBLIC_BASE = `${SUPABASE_PROJECT_URL}/storage/v1/object/public/plannerdata`;
+
+      const key = import.meta?.env?.VITE_SUPABASE_API_KEY;
+      if (!key) {
+        console.error("❌ VITE_SUPABASE_API_KEY ontbreekt of import.meta.env is niet beschikbaar.");
+        alert("Upload mislukt: API key niet beschikbaar.");
+        return;
+      }
+
       const response = await fetch(`${SUPABASE_PUBLIC_BASE}/${targetFileName}`, {
         method: "PUT",
         headers: {
-          Authorization: (() => {
-            try {
-              const key = import.meta.env.VITE_SUPABASE_API_KEY;
-              if (!key) {
-                console.error("❌ VITE_SUPABASE_API_KEY ontbreekt of is leeg.");
-                alert("Upload mislukt: geen geldige Supabase API key ingesteld.");
-                return 'KEY_NOT_SET';
-              }
-              return `Bearer ${key}`;
-            } catch (err) {
-              console.error("❌ Fout bij toegang tot import.meta.env:", err);
-              alert("Upload mislukt: import.meta.env niet beschikbaar.");
-              return 'KEY_NOT_SET';
-            }
-          })(),
+          Authorization: `Bearer ${key}`,
           "Content-Type": "application/json",
           "x-upsert": "true"
         },
