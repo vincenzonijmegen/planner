@@ -77,6 +77,13 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, pla
     }
   };
 
+
+const SUPABASE_STORAGE_URL = "https://yknympukfnazpvoxufwd.supabase.co/storage/v1/object";
+const SUPABASE_BUCKET = "plannerdata";
+const SUPABASE_API_KEY = import.meta.env.VITE_SUPABASE_API_KEY;
+
+
+
   useEffect(() => {
     let totaal = 0;
     medewerkers.forEach((m) => {
@@ -133,6 +140,18 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, pla
 
           Download planning
         </button>
+
+<label className="bg-green-600 text-white px-4 py-2 rounded shadow cursor-pointer">
+  <span>Upload Excel → Supabase</span>
+  <input
+    type="file"
+    accept=".xlsx"
+    onChange={(e) => handleExcelUploadToStorage(e)}
+    className="hidden"
+  />
+</label>
+
+
 
         <label className="bg-yellow-600 text-white px-4 py-2 rounded shadow cursor-pointer">
           <span>Importeer planning</span>
@@ -385,4 +404,43 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, pla
       )}
     </div>
   );
+}
+import * as XLSX from "xlsx";
+
+const SUPABASE_STORAGE_URL = "https://yknympukfnazpvoxufwd.supabase.co/storage/v1/object";
+const SUPABASE_BUCKET = "plannerdata";
+const SUPABASE_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkenZ3ZGRicmRva3d1dG14ZmR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjQ4MDUsImV4cCI6MjA2Mzc0MDgwNX0.C4SRpBwMvQwqkZXK3ykghLi11rAJtqU1RxFinVm-4a8"; // vervang dit met je echte anon key
+
+async function handleExcelUploadToStorage(e) {
+  const file = e.target.files[0];
+  const reader = new FileReader();
+
+  reader.onload = async (evt) => {
+    const workbook = XLSX.read(evt.target.result, { type: "binary" });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const parsed = XLSX.utils.sheet_to_json(sheet);
+
+    const blob = new Blob([JSON.stringify(parsed, null, 2)], { type: "application/json" });
+
+    const response = await fetch(
+      `${SUPABASE_STORAGE_URL}/${SUPABASE_BUCKET}/o/planning.json`,
+      {
+        method: "PUT",
+        headers: {
+          "Authorization": `Bearer ${SUPABASE_API_KEY}`,
+          "Content-Type": "application/json",
+          "x-upsert": "true"
+        },
+        body: blob
+      }
+    );
+
+    if (response.ok) {
+      alert("Geüpload naar Supabase Storage!");
+    } else {
+      alert("Fout bij uploaden: " + response.statusText);
+    }
+  };
+
+  reader.readAsBinaryString(file);
 }
