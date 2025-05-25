@@ -1,125 +1,96 @@
 console.log("🚀 PlannerBoard geladen");
 
-
 import React, { useState, useEffect } from "react";
+import * as XLSX from "xlsx";
+import {
+  SUPABASE_API_KEY,
+  getSupabaseUploadUrl
+} from "./config";
 import {
   getShiftCountPerMedewerker,
   importeerBeschikbaarheidKnop,
-  importeerLoonkostenKnop,
+  importeerLoonkostenKnop
 } from "./utils/plannerHelpers";
 import { dagMap } from "./utils/dagen";
 import { exportToPDF } from "./utils/exportToPDF";
 import { kleurSchema } from "./utils/kleurSchema";
 
-const dagen = ["ma", "di", "wo", "do", "vr", "za", "zo"];
-const shifts = [1, 2];
-
-export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, planning, setPlanning, onTotalLoonkostenChange }) {
-  const [medewerkers, setMedewerkers] = useState(() => {
-    try {
-      const saved = localStorage.getItem("medewerkers");
-      const parsed = saved ? JSON.parse(saved) : [];
-      return Array.isArray(parsed) ? parsed.filter((m) => m && typeof m === "object" && m.naam) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  const [beschikbaarheid, setLocalBeschikbaarheid] = useState(() => {
-    try {
-      const saved = localStorage.getItem("beschikbaarheid");
-      return saved ? JSON.parse(saved) : {};
-    } catch {
-      return {};
-    }
-  });
-
-  useEffect(() => {
-    if (beschikbaarheidProp && Object.keys(beschikbaarheidProp).length > 0) {
-      setLocalBeschikbaarheid(beschikbaarheidProp);
-      localStorage.setItem("beschikbaarheid", JSON.stringify(beschikbaarheidProp));
-    }
-  }, [beschikbaarheidProp]);
-
+export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaarheidProp, planning, setPlanning, onTotalLoonkostenChange }) {
   const [popup, setPopup] = useState(null);
+  const [localBeschikbaarheid, setLocalBeschikbaarheid] = useState(beschikbaarheidProp);
   const shiftCountPerMedewerker = getShiftCountPerMedewerker(planning);
 
-  const [loonkostenPerUur, setLoonkostenPerUur] = useState(() => {
-    try {
-      const saved = localStorage.getItem("loonkosten");
-      return saved ? JSON.parse(saved) : {};
-    } catch {
-      return {};
-    }
-  });
-
-  const gestructureerdeUpdate = (prev, popup, functie, soort) => {
-    return {
-      ...prev,
-      [popup.medewerker]: {
-        ...prev[popup.medewerker],
-        [popup.dag]: {
-          ...prev[popup.medewerker]?.[popup.dag],
-          [popup.shift]: { functie, soort },
+  const uploadJSON = async (file, targetFileName) => {
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      const blob = new Blob([evt.target.result], { type: "application/json" });
+      const response = await fetch(getSupabaseUploadUrl(targetFileName), {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${SUPABASE_API_KEY}`,
+          "Content-Type": "application/json",
+          "x-upsert": "true"
         },
-      },
+        body: blob
+      });
+      if (response.ok) alert(`${targetFileName} geüpload!`);
+      else alert(`Fout bij uploaden van ${targetFileName}: ${response.statusText}`);
     };
+    reader.readAsText(file);
   };
 
-  const updatePlanning = (functie, soort) => {
-    if (popup) {
-      setPlanning((prev) => {
-        const nieuwePlanning = gestructureerdeUpdate(prev, popup, functie, soort);
-        localStorage.setItem("planning", JSON.stringify(nieuwePlanning));
-        return nieuwePlanning;
-      });
-      setPopup(null);
+  const downloadJSON = async (filename) => {
+    try {
+      const res = await fetch(getSupabaseUploadUrl(filename));
+      if (!res.ok) throw new Error("Bestand niet gevonden");
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      alert(`Download mislukt voor ${filename}`);
     }
   };
-
-
-const SUPABASE_STORAGE_URL = "https://edzvwddbrdokwutmxfdx.supabase.co/storage/v1/object";
-const SUPABASE_BUCKET = "plannerdata";
-
-
-
-  useEffect(() => {
-    let totaal = 0;
-    medewerkers.forEach((m) => {
-      dagen.forEach((dag) => {
-        shifts.forEach((shift) => {
-          const entry = planning[m.naam]?.[dag]?.[shift];
-          if (entry) {
-            let uren = 6;
-            if (entry.soort === "standby") uren = 4;
-            else if (entry.soort === "laat") uren = 4;
-
-            const leeftijd = typeof m.leeftijd === 'number' ? m.leeftijd : 18;
-            const uurloon = loonkostenPerUur[leeftijd] ?? 15;
-            totaal += uren * uurloon;
-          }
-        });
-      });
-    });
-
-    if (typeof onTotalLoonkostenChange === 'function') {
-      onTotalLoonkostenChange(totaal);
-    }
-  }, [planning, medewerkers]);
 
   return (
     <div className="p-4 bg-gray-100">
-      <div className="flex gap-2 items-center mb-4">
-
-        {importeerBeschikbaarheidKnop(setLocalBeschikbaarheid, setMedewerkers)}
-
-        {React.cloneElement(importeerLoonkostenKnop(setLoonkostenPerUur), {
+      <div className="flex flex-wrap gap-2 items-center mb-4">
+        {importeerBeschikbaarheidKnop(setLocalBeschikbaarheid)}
+        {React.cloneElement(importeerLoonkostenKnop(() => {}), {
           className: "bg-blue-600 text-white px-4 py-2 rounded shadow"
         })}
 
+        {/* Upload knoppen */}
+        {["planning.json", "beschikbaarheid.json", "medewerkers.json"].map((filename) => (
+          <label key={filename} className="bg-green-600 text-white px-4 py-2 rounded shadow cursor-pointer">
+            Upload {filename}
+            <input
+              type="file"
+              accept=".json"
+              onChange={(e) => uploadJSON(e.target.files[0], filename)}
+              className="hidden"
+            />
+          </label>
+        ))}
+
+        {/* Download knoppen */}
+        {["planning.json", "beschikbaarheid.json", "medewerkers.json"].map((filename) => (
+          <button
+            key={filename}
+            onClick={() => downloadJSON(filename)}
+            className="bg-gray-700 text-white px-4 py-2 rounded shadow"
+          >
+            Download {filename}
+          </button>
+        ))}
+
         <button
           onClick={() =>
-            exportToPDF({ medewerkers, planning, beschikbaarheid, loonkostenPerUur, shiftCountPerMedewerker })
+            exportToPDF({ medewerkers, planning, beschikbaarheid: localBeschikbaarheid, loonkostenPerUur: {}, shiftCountPerMedewerker })
           }
           className="bg-red-600 text-white px-4 py-2 rounded shadow"
         >
@@ -415,7 +386,7 @@ const SUPABASE_BUCKET = "plannerdata";
 }
 import * as XLSX from "xlsx";
 
-const SUPABASE_STORAGE_URL = "https://yknympukfnazpvoxufwd.supabase.co/storage/v1/object";
+const SUPABASE_STORAGE_URL = "https://edzvwddbrdokwutmxfdx.supabase.co/storage/v1/object";
 const SUPABASE_BUCKET = "plannerdata";
 const SUPABASE_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkenZ3ZGRicmRva3d1dG14ZmR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjQ4MDUsImV4cCI6MjA2Mzc0MDgwNX0.C4SRpBwMvQwqkZXK3ykghLi11rAJtqU1RxFinVm-4a8"; // vervang dit met je echte anon key
 
@@ -454,7 +425,7 @@ async function handleExcelUploadToStorage(e) {
 }
 
 async function handleBeschikbaarheidUpload(e) {
-  const SUPABASE_STORAGE_URL = "https://yknympukfnazpvoxufwd.supabase.co/storage/v1/object";
+  const SUPABASE_STORAGE_URL = "https://edzvwddbrdokwutmxfdx.supabase.co/storage/v1/object";
   const SUPABASE_BUCKET = "plannerdata";
   const SUPABASE_API_KEY = "JOUW_ANON_KEY_HIER"; // vervang dit
 

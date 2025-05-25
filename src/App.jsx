@@ -1,9 +1,6 @@
-// App.jsx – aangepaste versie met Supabase als centrale databron
-
 import { useState, useEffect } from "react";
 import PlannerBoard from "./PlannerBoard";
-
-const SUPABASE_BASE = "https://edzvwddbrdokwutmxfdx.supabase.co/storage/v1/object/public/plannerdata";
+import { SUPABASE_PUBLIC_BASE } from "./config";
 
 export default function App() {
   const [planning, setPlanning] = useState({});
@@ -13,7 +10,7 @@ export default function App() {
 
   const fetchJSON = async (bestandsnaam, setFunctie) => {
     try {
-      const res = await fetch(`${SUPABASE_BASE}/${bestandsnaam}`);
+      const res = await fetch(`${SUPABASE_PUBLIC_BASE}/${bestandsnaam}`);
       if (!res.ok) throw new Error(`${bestandsnaam} niet gevonden`);
       const json = await res.json();
       setFunctie(json);
