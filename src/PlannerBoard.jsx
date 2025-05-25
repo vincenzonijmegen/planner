@@ -33,7 +33,15 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
       const response = await fetch(`${SUPABASE_PUBLIC_BASE}/${targetFileName}`, {
         method: "PUT",
         headers: {
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_API_KEY}`,
+          Authorization: (() => {
+            const key = import.meta.env.VITE_SUPABASE_API_KEY;
+            if (!key) {
+              console.error("❌ VITE_SUPABASE_API_KEY is niet ingesteld. Zet deze in .env of Vercel.");
+              alert("Upload mislukt: geen API key ingesteld.");
+              return 'KEY_NOT_SET';
+            }
+            return `Bearer ${key}`;
+          })(),
           "Content-Type": "application/json",
           "x-upsert": "true"
         },
