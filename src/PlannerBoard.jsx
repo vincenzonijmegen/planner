@@ -456,7 +456,7 @@ async function handleExcelUploadToStorage(e) {
 async function handleBeschikbaarheidUpload(e) {
   const SUPABASE_STORAGE_URL = "https://yknympukfnazpvoxufwd.supabase.co/storage/v1/object";
   const SUPABASE_BUCKET = "plannerdata";
-  const SUPABASE_API_KEY = "JOUW_ANON_KEY_HIER"; // <-- vervang door je anon key
+  const SUPABASE_API_KEY = "JOUW_ANON_KEY_HIER"; // vervang dit
 
   const file = e.target.files[0];
   const reader = new FileReader();
@@ -465,7 +465,7 @@ async function handleBeschikbaarheidUpload(e) {
     const blob = new Blob([evt.target.result], { type: "application/json" });
 
     const response = await fetch(
-      `${SUPABASE_STORAGE_URL}/${SUPABASE_BUCKET}/o/beschikbaarheid.json`,
+      `${SUPABASE_STORAGE_URL}/public/${SUPABASE_BUCKET}/beschikbaarheid.json`,
       {
         method: "PUT",
         headers: {
@@ -478,7 +478,7 @@ async function handleBeschikbaarheidUpload(e) {
     );
 
     if (response.ok) {
-      alert("✅ Beschikbaarheid succesvol geüpload naar Supabase!");
+      alert("✅ Beschikbaarheid geüpload naar Supabase!");
     } else {
       alert("❌ Upload mislukt: " + response.statusText);
     }
