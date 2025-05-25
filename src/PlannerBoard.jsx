@@ -2,7 +2,6 @@ console.log("🚀 PlannerBoard geladen");
 
 import React, { useState, useEffect } from "react";
 import {
-  SUPABASE_API_KEY,
   SUPABASE_PUBLIC_BASE
 } from "./config";
 import {
