@@ -150,6 +150,15 @@ const SUPABASE_BUCKET = "plannerdata";
   />
 </label>
 
+<label className="bg-orange-600 text-white px-4 py-2 rounded shadow cursor-pointer">
+  Upload Beschikbaarheid → Supabase
+  <input
+    type="file"
+    accept=".json"
+    onChange={(e) => handleBeschikbaarheidUpload(e)}
+    className="hidden"
+  />
+</label>
 
 
         <label className="bg-yellow-600 text-white px-4 py-2 rounded shadow cursor-pointer">
@@ -442,4 +451,38 @@ async function handleExcelUploadToStorage(e) {
   };
 
   reader.readAsBinaryString(file);
+}
+
+async function handleBeschikbaarheidUpload(e) {
+  const SUPABASE_STORAGE_URL = "https://yknympukfnazpvoxufwd.supabase.co/storage/v1/object";
+  const SUPABASE_BUCKET = "plannerdata";
+  const SUPABASE_API_KEY = "JOUW_ANON_KEY_HIER"; // <-- vervang door je anon key
+
+  const file = e.target.files[0];
+  const reader = new FileReader();
+
+  reader.onload = async (evt) => {
+    const blob = new Blob([evt.target.result], { type: "application/json" });
+
+    const response = await fetch(
+      `${SUPABASE_STORAGE_URL}/${SUPABASE_BUCKET}/o/beschikbaarheid.json`,
+      {
+        method: "PUT",
+        headers: {
+          "Authorization": `Bearer ${SUPABASE_API_KEY}`,
+          "Content-Type": "application/json",
+          "x-upsert": "true"
+        },
+        body: blob
+      }
+    );
+
+    if (response.ok) {
+      alert("✅ Beschikbaarheid succesvol geüpload naar Supabase!");
+    } else {
+      alert("❌ Upload mislukt: " + response.statusText);
+    }
+  };
+
+  reader.readAsText(file);
 }
