@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
   SUPABASE_PROJECT_URL,
-  SUPABASE_BUCKET,
   SUPABASE_API_KEY
 } from "./config";
 import {
@@ -23,6 +22,7 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
     const reader = new FileReader();
     reader.onload = async (evt) => {
       const blob = new Blob([evt.target.result], { type: "application/json" });
+      const SUPABASE_PUBLIC_BASE = `${SUPABASE_PROJECT_URL}/storage/v1/object/public/plannerdata`;
       const response = await fetch(`${SUPABASE_PUBLIC_BASE}/${targetFileName}`, {
         method: "PUT",
         headers: {
@@ -40,6 +40,7 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
 
   const downloadJSON = async (filename) => {
     try {
+      const SUPABASE_PUBLIC_BASE = `${SUPABASE_PROJECT_URL}/storage/v1/object/public/plannerdata`;
       const res = await fetch(`${SUPABASE_PUBLIC_BASE}/${filename}`);
       if (!res.ok) throw new Error("Bestand niet gevonden");
       const blob = await res.blob();
