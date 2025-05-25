@@ -26,7 +26,7 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
       const response = await fetch(`${SUPABASE_PUBLIC_BASE}/${targetFileName}`, {
         method: "PUT",
         headers: {
-          Authorization: `Bearer ${SUPABASE_API_KEY}`,
+          Authorization: `Bearer ${import.meta.env.REACT_APP_SUPABASE_API_KEY}`,
           "Content-Type": "application/json",
           "x-upsert": "true"
         },
