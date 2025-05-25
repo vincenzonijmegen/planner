@@ -1,7 +1,6 @@
 console.log("🚀 PlannerBoard geladen");
 
 import React, { useState, useEffect } from "react";
-import * as XLSX from "xlsx";
 import {
   SUPABASE_API_KEY,
   getSupabaseUploadUrl
@@ -65,7 +64,7 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
         })}
 
         {/* Upload knoppen */}
-        {["planning.json", "beschikbaarheid.json", "medewerkers.json"].map((filename) => (
+        {['planning.json', 'beschikbaarheid.json', 'medewerkers.json'].map((filename) => (
           <label key={filename} className="bg-green-600 text-white px-4 py-2 rounded shadow cursor-pointer">
             Upload {filename}
             <input
@@ -78,7 +77,7 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
         ))}
 
         {/* Download knoppen */}
-        {["planning.json", "beschikbaarheid.json", "medewerkers.json"].map((filename) => (
+        {['planning.json', 'beschikbaarheid.json', 'medewerkers.json'].map((filename) => (
           <button
             key={filename}
             onClick={() => downloadJSON(filename)}
