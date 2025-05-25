@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import PlannerBoard from "./PlannerBoard";
 
-const SUPABASE_BASE = "https://yknympukfnazpvoxufwd.supabase.co/storage/v1/object/public/plannerdata";
+const SUPABASE_BASE = "https://edzvwddbrdokwutmxfdx.supabase.co/storage/v1/object/public/plannerdata";
 
 export default function App() {
   const [planning, setPlanning] = useState({});
