@@ -34,18 +34,19 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
         method: "PUT",
         headers: {
           Authorization: (() => {
-            const key = import.meta.env.VITE_SUPABASE_API_KEY;
-            if (typeof key === 'undefined') {
-              console.error("❌ VITE_SUPABASE_API_KEY bestaat niet in de omgeving (import.meta.env). Mogelijk niet goed gedeclareerd of Vercel opnieuw builden.");
-              alert("Upload mislukt: omgevingsvariabele ontbreekt.");
+            try {
+              const key = import.meta.env.VITE_SUPABASE_API_KEY;
+              if (!key) {
+                console.error("❌ VITE_SUPABASE_API_KEY ontbreekt of is leeg.");
+                alert("Upload mislukt: geen geldige Supabase API key ingesteld.");
+                return 'KEY_NOT_SET';
+              }
+              return `Bearer ${key}`;
+            } catch (err) {
+              console.error("❌ Fout bij toegang tot import.meta.env:", err);
+              alert("Upload mislukt: import.meta.env niet beschikbaar.");
               return 'KEY_NOT_SET';
             }
-            if (!key) {
-              console.error("❌ VITE_SUPABASE_API_KEY is niet ingesteld. Zet deze in .env of Vercel.");
-              alert("Upload mislukt: geen API key ingesteld.");
-              return 'KEY_NOT_SET';
-            }
-            return `Bearer ${key}`;
           })(),
           "Content-Type": "application/json",
           "x-upsert": "true"
@@ -116,6 +117,7 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
         >
           Exporteer naar PDF
         </button>
+    
 
         <button
           onClick={() => {
