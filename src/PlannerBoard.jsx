@@ -2,7 +2,8 @@ console.log("🚀 PlannerBoard geladen");
 
 import React, { useState, useEffect } from "react";
 import {
-  SUPABASE_PUBLIC_BASE
+  SUPABASE_PUBLIC_BASE,
+  SUPABASE_API_KEY
 } from "./config";
 import {
   getShiftCountPerMedewerker,
@@ -25,7 +26,7 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
       const response = await fetch(`${SUPABASE_PUBLIC_BASE}/${targetFileName}`, {
         method: "PUT",
         headers: {
-          Authorization: `Bearer ${process.env.REACT_APP_SUPABASE_API_KEY}`,
+          Authorization: `Bearer ${SUPABASE_API_KEY}`,
           "Content-Type": "application/json",
           "x-upsert": "true"
         },
