@@ -39,6 +39,13 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
       console.log("🔐 API-key:", key);
       console.log("📁 Upload naar:", `${SUPABASE_PUBLIC_BASE}/${targetFileName}`);
       console.log("📦 JSON inhoud:", json);
+      console.error("🔍 Uploaddetails:", {
+        bestand: targetFileName,
+        apiKeyLeeg: !key,
+        blobGrootte: blob.size,
+        jsonType: typeof json
+      });
+
       const response = await fetch(`${SUPABASE_PUBLIC_BASE}/${targetFileName}`, {
         method: "PUT",
         headers: {
