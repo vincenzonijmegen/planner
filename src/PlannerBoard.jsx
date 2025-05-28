@@ -24,7 +24,8 @@ const supabase = createClient(SUPABASE_PROJECT_URL, SUPABASE_API_KEY);
 const dagen = ["ma", "di", "wo", "do", "vr", "za", "zo"];
 const shifts = [1, 2];
 
-export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, planning, setPlanning }) {
+export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
+  const [planning, setPlanning] = useState({});
   const [loonkostenPerUur, setLoonkostenPerUur] = useState({});
   const [popup, setPopup] = useState(null);
   const [localBeschikbaarheid, setLocalBeschikbaarheid] = useState(beschikbaarheidProp);
@@ -58,7 +59,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, pla
     }
     fetchGegevens();
     setIsLoaded(true);
-  }, [setPlanning]);
+  }, []);
 
 async function opslaanNaarSupabase() {
   const bestanden = [
