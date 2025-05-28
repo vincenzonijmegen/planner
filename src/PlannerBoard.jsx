@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  SUPABASE_PROJECT_URL
-} from "./config";
+import { SUPABASE_PROJECT_URL, SUPABASE_API_KEY, SUPABASE_BUCKET, SUPABASE_STORAGE_URL, SUPABASE_PUBLIC_BASE } from "./config";
 import {
   getShiftCountPerMedewerker,
   importeerBeschikbaarheidKnop,
