@@ -435,7 +435,7 @@ ${errorText}`);
   );
 }
 // verplaatst naar de top voor consistentie
-import * as XLSX from "xlsx";
+
 
 
 
@@ -492,24 +492,29 @@ async function handleBeschikbaarheidUpload(e) {
     }
 
     const blob = new Blob([JSON.stringify(json, null, 2)], { type: "application/json" });
+    const url = `${SUPABASE_STORAGE_URL}/public/${SUPABASE_BUCKET}/beschikbaarheid.json`;
 
-    const response = await fetch(
-      `${SUPABASE_STORAGE_URL}/public/${SUPABASE_BUCKET}/beschikbaarheid.json`,
-      {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${SUPABASE_API_KEY}`,
-          "Content-Type": "application/json",
-          "x-upsert": "true"
-        },
-        body: blob
-      }
-    );
+    console.log("🔐 API-key:", SUPABASE_API_KEY);
+    console.log("📁 Upload naar:", url);
+    console.log("📦 JSON inhoud:", json);
+
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${SUPABASE_API_KEY}`,
+        "Content-Type": "application/json",
+        "x-upsert": "true"
+      },
+      body: blob
+    });
 
     if (response.ok) {
       alert("✅ Beschikbaarheid geüpload naar Supabase!");
     } else {
-      alert("❌ Upload mislukt: " + response.statusText);
+      const errorText = await response.text();
+      console.error("❌ Supabase foutmelding (beschikbaarheid):", errorText);
+      alert(`Fout bij uploaden: ${response.statusText}
+${errorText}`);
     }
   };
 
