@@ -440,9 +440,9 @@ async function handleExcelUploadToStorage(e) {
 }
 
 async function handleBeschikbaarheidUpload(e) {
-  const SUPABASE_STORAGE_URL = "https://edzvwddbrdokwutmxfdx.supabase.co/storage/v1/object";
-  const SUPABASE_BUCKET = "plannerdata";
-  const SUPABASE_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkenZ3ZGRicmRva3d1dG14ZmR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjQ4MDUsImV4cCI6MjA2Mzc0MDgwNX0.C4SRpBwMvQwqkZXK3ykghLi11rAJtqU1RxFinVm-4a8"; // vervang dit
+  import { SUPABASE_STORAGE_URL } from "./config";
+  import { SUPABASE_BUCKET } from "./config";
+  import { SUPABASE_API_KEY } from "./config";
 
   const file = e.target.files[0];
   const reader = new FileReader();
