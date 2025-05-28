@@ -1,5 +1,4 @@
-// ✅ Complete aangepaste JSX inclusief nieuwe knoppenstructuur,
-// exclusie van medewerkers.json en automatische Supabase upload
+// ✅ Complete aangepaste JSX inclusief volledige layout, knoppenstructuur en planningsrooster
 
 import React, { useState } from "react";
 import { createClient } from "@supabase/supabase-js";
@@ -23,7 +22,7 @@ const supabase = createClient(SUPABASE_PROJECT_URL, SUPABASE_API_KEY);
 const dagen = ["ma", "di", "wo", "do", "vr", "za", "zo"];
 const shifts = [1, 2];
 
-export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, planning, setPlanning, onTotalLoonkostenChange }) {
+export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, planning, setPlanning }) {
   const [loonkostenPerUur, setLoonkostenPerUur] = useState({});
   const [popup, setPopup] = useState(null);
   const [localBeschikbaarheid, setLocalBeschikbaarheid] = useState(beschikbaarheidProp);
@@ -86,81 +85,26 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, pla
         {React.cloneElement(importeerLoonkostenKnop(setLoonkostenPerUur), {
           className: "bg-blue-600 text-white px-4 py-2 rounded shadow"
         })}
-
-        {/* Upload knoppen */}
-        {["planning.json", "beschikbaarheid.json", "medewerkers.json"].map((filename) => (
-          <label key={filename} className="bg-green-600 text-white px-4 py-2 rounded shadow cursor-pointer">
-            Upload {filename}
-            <input
-              type="file"
-              accept=".json"
-              onChange={(e) => uploadJSON(e.target.files[0], filename)}
-              className="hidden"
-            />
-          </label>
-        ))}
-
-        {/* Download knoppen */}
-        {["planning.json", "beschikbaarheid.json", "medewerkers.json"].map((filename) => (
-          <button
-            key={filename}
-            onClick={() => downloadJSON(filename)}
-            className="bg-gray-700 text-white px-4 py-2 rounded shadow"
-          >
-            Download {filename}
-          </button>
-        ))}
-
+        <button onClick={opslaanNaarSupabase} className="bg-indigo-600 text-white px-4 py-2 rounded shadow">
+          💾 Opslaan naar Supabase
+        </button>
+        <button onClick={() => downloadJSON("planning.json")} className="bg-gray-700 text-white px-4 py-2 rounded shadow">
+          ⬇️ Download planning.json
+        </button>
         <button
           onClick={() =>
-            exportToPDF({ medewerkers, planning, beschikbaarheid: localBeschikbaarheid, loonkostenPerUur: {}, shiftCountPerMedewerker })
+            exportToPDF({ medewerkers, planning, beschikbaarheid: localBeschikbaarheid, loonkostenPerUur, shiftCountPerMedewerker })
           }
           className="bg-red-600 text-white px-4 py-2 rounded shadow"
         >
-          Exporteer naar PDF
+          📄 Exporteer naar PDF
         </button>
-    
-
-        <button
-          onClick={() => {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(planning));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", "planning-backup.json");
-            downloadAnchor.click();
-          }}
-          className="bg-purple-600 text-white px-4 py-2 rounded shadow"
-        >
-
-          Download planning
-        </button>
-
-<label className="bg-green-600 text-white px-4 py-2 rounded shadow cursor-pointer">
-  <span>Upload Excel → Supabase</span>
-  <input
-    type="file"
-    accept=".xlsx"
-    onChange={(e) => handleExcelUploadToStorage(e)}
-    className="hidden"
-  />
-</label>
-
-<label className="bg-orange-600 text-white px-4 py-2 rounded shadow cursor-pointer">
-  Upload Beschikbaarheid → Supabase
-  <input
-    type="file"
-    accept=".json"
-    onChange={(e) => handleBeschikbaarheidUpload(e)}
-    className="hidden"
-  />
-</label>
-
-
         <label className="bg-yellow-600 text-white px-4 py-2 rounded shadow cursor-pointer">
-          <span>Importeer planning</span>
+          📂 Importeer planning
           <input
             type="file"
             accept="application/json"
+            className="hidden"
             onChange={(e) => {
               const file = e.target.files[0];
               if (file) {
@@ -177,96 +121,10 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, pla
                 reader.readAsText(file);
               }
             }}
-            className="hidden"
           />
         </label>
+      </div>
 
-</div>
-
-      
-
-      {medewerkers.length > 0 && (
-        <div className="overflow-x-auto mb-4">
-          <table className="text-xs border-collapse w-full bg-white shadow">
-            <thead className="sticky top-0 bg-white z-10 shadow-sm">
-              <tr>
-                <th className="border px-2 py-1 w-60 text-left">Type</th>
-                {dagen.map((dag) =>
-                  shifts.map((shift) => (
-                    <th key={`${dag}-${shift}`} className="border px-2 py-1 text-center" style={{ borderLeftWidth: shift === 1 ? '2px' : undefined }}>
-                      {dag} {shift}
-                    </th>
-                  ))
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              
-              <tr>
-                <td className="border px-2 py-1 font-semibold bg-gray-100">Totaal ingepland</td>
-                {dagen.map((dag) =>
-                  shifts.map((shift) => {
-                    const totaal = medewerkers.filter((m) => {
-                      const entry = planning[m.naam]?.[dag]?.[shift];
-                      return entry?.functie === "ijsbereider" || entry?.functie === "ijsvoorbereider" || entry?.functie === "schepper";
-                    }).length;
-                    return (
-                      <td
-                        key={`Totaal-${dag}-${shift}`}
-                        className="border px-2 py-1 text-center bg-gray-50 font-semibold"
-                        style={{ borderLeftWidth: shift === 1 ? '2px' : undefined }}
-                      >
-                        {totaal}
-                      </td>
-                    );
-                  })
-                )}
-              </tr>
-
-{["Bereiders", "Voorbereiders", "Scheppers", "Kosten"].map((type) => (
-                <tr key={type}>
-                  <td className="border px-2 py-1 font-semibold">{type}</td>
-                  {dagen.map((dag) =>
-                    shifts.map((shift) => {
-                      let value = 0;
-                      if (type === "Kosten") {
-                        value = medewerkers.reduce((totaal, m) => {
-                          const entry = planning[m.naam]?.[dag]?.[shift];
-                          if (!entry) return totaal;
-                          let uren = 6;
-                          if (entry.soort === "standby") uren = 4;
-                          else if (entry.soort === "laat") uren = 4;
-
-                          const leeftijd = typeof m.leeftijd === "number" ? m.leeftijd : 18;
-                          const uurloon = loonkostenPerUur[leeftijd] ?? 15;
-                          return totaal + uren * uurloon;
-                        }, 0);
-                      } else {
-                        const functieMap = {
-                          Bereiders: "ijsbereider",
-                          Voorbereiders: "ijsvoorbereider",
-                          Scheppers: "schepper",
-                        };
-                        const functie = functieMap[type];
-                        value = medewerkers.filter(
-                          (m) => planning[m.naam]?.[dag]?.[shift]?.functie === functie
-                        ).length;
-                      }
-                      return (
-                        <td key={`${type}-${dag}-${shift}`} className="border px-2 py-1 text-center" style={{ borderLeftWidth: shift === 1 ? '2px' : undefined }}>
-                          {type === "Kosten" ? `€ ${Math.round(value)}` : value}
-                        </td>
-                      );
-                    })
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {/* Medewerkerplanning */}
       {medewerkers.length > 0 && (
         <table className="table-fixed border w-full bg-white text-xs font-sans">
           <thead>
@@ -281,100 +139,75 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, pla
               )}
             </tr>
           </thead>
-          ...
           <tbody>
-  {medewerkers.map((m) => {
-    const naamKey = m.naam.trim().toLowerCase();
+            {medewerkers.map((m) => {
+              const naamKey = m.naam.trim().toLowerCase();
+              return (
+                <tr key={m.naam}>
+                  <td className="border px-4 py-2 text-left whitespace-nowrap w-60 font-bold">
+                    {m.naam} [{m.leeftijd ?? "?"}] ({shiftCountPerMedewerker[m.naam] || 0}/{m.maxShifts ?? "?"})
+                  </td>
+                  {dagen.map((dag) =>
+                    shifts.map((shift) => {
+                      const entry = planning[m.naam]?.[dag]?.[shift];
+                      const beschikbaar = localBeschikbaarheid?.[naamKey]?.[dagMap[dag]]?.[shift];
 
-    return (
-      <tr key={m.naam}>
-       <td
-  className={`border px-4 py-2 text-left whitespace-nowrap w-60 font-bold ${
-    (shiftCountPerMedewerker[m.naam] || 0) > (m.maxShifts ?? Infinity)
-      ? "bg-red-200"
-      : (shiftCountPerMedewerker[m.naam] || 0) < (m.maxShifts ?? 0)
-      ? "bg-yellow-200"
-      : ""
-  }`}
-  title={m.opmerking || ""}
->
-  <span className="flex items-center gap-1">
-    {m.naam.split(" ").map((part, i) =>
-      i === 0 ? part : part.charAt(0).toUpperCase() + part.slice(1)
-    ).join(" ")} [{m.leeftijd ?? "?"}] ({shiftCountPerMedewerker[m.naam] || 0}/{m.maxShifts ?? "?"})
-    {m.opmerking && (
-      <span
-        className="text-red-600 text-sm"
-        title={m.opmerking}
-      >
-        📌
-      </span>
-    )}
-  </span>
-</td>
+                      let text = "";
+                      let bgColor = "#ffffff";
+                      let color = "#000000";
 
-        {dagen.map((dag) =>
-          shifts.map((shift) => {
-            const entry = planning[m.naam]?.[dag]?.[shift];
-            const beschikbaar = localBeschikbaarheid?.[naamKey]?.[dagMap[dag]]?.[shift];
+                      if (entry) {
+                        const kleur = kleurSchema[entry.functie]?.[entry.soort];
+                        bgColor = kleur?.hex || "#ffffff";
+                        color = kleur?.tailwind.includes("text-white") ? "#ffffff" : "#000000";
+                        const labelMap = {
+                          schepper: { vast: "schep", standby: "schep(s)", laat: "schep(l)" },
+                          ijsbereider: { vast: "bereider", standby: "bereider(s)", laat: "bereider(l)" },
+                          ijsvoorbereider: { vast: "prep", standby: "prep(s)", laat: "prep(l)" },
+                        };
+                        text = labelMap[entry.functie]?.[entry.soort] || `${entry.functie} (${entry.soort})`;
+                      } else if (beschikbaar) {
+                        const kleur = kleurSchema.beschikbaar;
+                        bgColor = kleur.hex;
+                        color = kleur.tailwind.includes("text-white") ? "#ffffff" : "#000000";
+                        text = "✓";
+                      }
 
-            let text = "";
-            let bgColor = "#ffffff";
-            let color = "#000000";
-
-            if (entry) {
-              const kleur = kleurSchema[entry.functie]?.[entry.soort];
-              bgColor = kleur?.hex || "#ffffff";
-              color = kleur?.tailwind.includes("text-white") ? "#ffffff" : "#000000";
-              const labelMap = {
-                schepper: { vast: "schep", standby: "schep(s)", laat: "schep(l)" },
-                ijsbereider: { vast: "bereider", standby: "bereider(s)", laat: "bereider(l)" },
-                ijsvoorbereider: { vast: "prep", standby: "prep(s)", laat: "prep(l)" },
-              };
-              text = labelMap[entry.functie]?.[entry.soort] || `${entry.functie} (${entry.soort})`;
-            } else if (beschikbaar) {
-              const kleur = kleurSchema.beschikbaar;
-              bgColor = kleur.hex;
-              color = kleur.tailwind.includes("text-white") ? "#ffffff" : "#000000";
-              text = "✓";
-            }
-           
-            return (
-              <td
-                key={`${m.naam}-${dag}-${shift}`}
-                className="border text-center cursor-pointer"
-                style={{
-                  borderLeftWidth: shift === 1 ? '2px' : undefined,
-                  backgroundColor: (shift === 1 && !text) ? '#FFFBEB' : (shift === 2 && !text ? '#F0F9FF' : bgColor),
-                  color,
-                  fontWeight: "bold"
-                }}
-                title={`Shift ${shift} op ${dagMap[dag]}`}
-                onClick={() => {
-                  const entry = planning[m.naam]?.[dag]?.[shift];
-                  if (entry) {
-                    setPlanning((prev) => {
-                      const nieuw = { ...prev };
-                      delete nieuw[m.naam][dag][shift];
-                      if (Object.keys(nieuw[m.naam][dag]).length === 0) delete nieuw[m.naam][dag];
-                      if (Object.keys(nieuw[m.naam]).length === 0) delete nieuw[m.naam];
-                      localStorage.setItem("planning", JSON.stringify(nieuw));
-                      return nieuw;
-                    });
-                  } else {
-                    setPopup({ medewerker: m.naam, dag, shift });
-                  }
-                }}
-              >
-                {text}
-              </td>
-            );
-          })
-        )}
-      </tr>
-    );
-  })}
-</tbody>
+                      return (
+                        <td
+                          key={`${m.naam}-${dag}-${shift}`}
+                          className="border text-center cursor-pointer"
+                          style={{
+                            borderLeftWidth: shift === 1 ? "2px" : undefined,
+                            backgroundColor: (shift === 1 && !text) ? "#FFFBEB" : (shift === 2 && !text ? "#F0F9FF" : bgColor),
+                            color,
+                            fontWeight: "bold"
+                          }}
+                          onClick={() => {
+                            const entry = planning[m.naam]?.[dag]?.[shift];
+                            if (entry) {
+                              setPlanning((prev) => {
+                                const nieuw = { ...prev };
+                                delete nieuw[m.naam][dag][shift];
+                                if (Object.keys(nieuw[m.naam][dag]).length === 0) delete nieuw[m.naam][dag];
+                                if (Object.keys(nieuw[m.naam]).length === 0) delete nieuw[m.naam];
+                                localStorage.setItem("planning", JSON.stringify(nieuw));
+                                return nieuw;
+                              });
+                            } else {
+                              setPopup({ medewerker: m.naam, dag, shift });
+                            }
+                          }}
+                        >
+                          {text}
+                        </td>
+                      );
+                    })
+                  )}
+                </tr>
+              );
+            })}
+          </tbody>
         </table>
       )}
 
@@ -407,75 +240,4 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, pla
       )}
     </div>
   );
-}
-
-async function handleExcelUploadToStorage(e) {
-  const file = e.target.files[0];
-  const reader = new FileReader();
-
-  reader.onload = async (evt) => {
-    try {
-      const workbook = XLSX.read(evt.target.result, { type: "binary" });
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const parsed = XLSX.utils.sheet_to_json(sheet);
-      const blob = new Blob([JSON.stringify(parsed, null, 2)], {
-        type: "application/json",
-      });
-
-      const { data, error } = await supabase.storage
-        .from(SUPABASE_BUCKET)
-        .upload("planning.json", blob, {
-          contentType: "application/json",
-          upsert: true,
-        });
-
-      if (error) {
-        console.error("❌ Supabase foutmelding (Excel):", error.message);
-        alert(`Fout bij uploaden: ${error.message}`);
-      } else {
-        alert("✅ Planning geüpload naar Supabase!");
-        console.log("✅ Upload succesvol:", data);
-      }
-    } catch (err) {
-      console.error("❌ Excel leesfout:", err);
-      alert("Fout bij het inlezen van het Excel-bestand.");
-    }
-  };
-
-  reader.readAsBinaryString(file);
-}
-
-
-async function handleBeschikbaarheidUpload(e) {
-  const file = e.target.files[0];
-  const reader = new FileReader();
-
-  reader.onload = async (evt) => {
-    try {
-      const json = JSON.parse(evt.target.result);
-      const blob = new Blob([JSON.stringify(json, null, 2)], {
-        type: "application/json",
-      });
-
-      const { data, error } = await supabase.storage
-        .from(SUPABASE_BUCKET)
-        .upload("beschikbaarheid.json", blob, {
-          contentType: "application/json",
-          upsert: true,
-        });
-
-      if (error) {
-        console.error("❌ Supabase foutmelding (beschikbaarheid):", error.message);
-        alert(`Fout bij uploaden: ${error.message}`);
-      } else {
-        alert("✅ Beschikbaarheid geüpload naar Supabase!");
-        console.log("✅ Upload succesvol:", data);
-      }
-    } catch (err) {
-      console.error("❌ JSON leesfout:", err);
-      alert("Fout bij het inlezen van het JSON-bestand.");
-    }
-  };
-
-  reader.readAsText(file);
 }
