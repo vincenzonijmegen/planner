@@ -48,6 +48,29 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, pla
     fetchGegevens();
   }, [setPlanning]);
 
+async function opslaanNaarSupabase() {
+  const bestanden = {
+    "planning.json": planning,
+    "beschikbaarheid.json": localBeschikbaarheid,
+    "loonkosten.json": loonkostenPerUur
+  };
+  for (const [naam, inhoud] of Object.entries(bestanden)) {
+    const blob = new Blob([JSON.stringify(inhoud, null, 2)], { type: "application/json" });
+    const { error } = await supabase.storage.from(SUPABASE_BUCKET).upload(naam, blob, {
+      contentType: "application/json",
+      upsert: true
+    });
+    if (error) {
+      console.error(`❌ Fout bij uploaden ${naam}:`, error.message);
+      alert(`Fout bij uploaden van ${naam}: ${error.message}`);
+      return;
+    }
+  }
+  alert("✅ Alles succesvol opgeslagen naar Supabase!");
+}
+
+
+
   return (
     <div className="p-4 bg-gray-100">
       <div className="flex flex-wrap gap-2 items-center mb-4">
