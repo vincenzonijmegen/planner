@@ -28,7 +28,7 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
         return;
       }
       const blob = new Blob([JSON.stringify(json)], { type: "application/json" });
-      const SUPABASE_PUBLIC_BASE = `${SUPABASE_PROJECT_URL}/storage/v1/object/public/plannerdata`;
+      const SUPABASE_PUBLIC_BASE = `${SUPABASE_PROJECT_URL}/storage/v1/object/public/${SUPABASE_BUCKET}`;
 
       const key = process.env.REACT_APP_SUPABASE_API_KEY;
       if (!key) {
@@ -54,6 +54,17 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
           "x-upsert": "true"
         },
         body: blob
+      });
+
+      console.error("🔍 Supabase fetch-payload:", {
+        method: "PUT",
+        url: `${SUPABASE_PUBLIC_BASE}/${targetFileName}`,
+        headers: {
+          Authorization: `Bearer ${key}`,
+          "Content-Type": "application/json",
+          "x-upsert": "true"
+        },
+        bodyPreview: await blob.text()
       });
 
       const response = await fetch(`${SUPABASE_PUBLIC_BASE}/${targetFileName}`, {
