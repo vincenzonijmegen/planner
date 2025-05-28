@@ -312,7 +312,7 @@ export function resetMedewerkerPlanning(naam, setPlanning) {
   });
 }
 
-export function getCellColor(medewerker, dag, shift, beschikbaarheid, planning) {
+export function getCellColor(medewerker, dag, shift, localBeschikbaarheid, planning) {
   const key = medewerker.trim().toLowerCase();
   const ingepland = planning[medewerker]?.[dag]?.[shift];
   if (ingepland) {
@@ -328,7 +328,7 @@ export function getCellColor(medewerker, dag, shift, beschikbaarheid, planning) 
   };
   const langeDag = dagMap[dag.toLowerCase()] || dag;
 
-  const beschikbaar = beschikbaarheid[key]?.[langeDag]?.[shift] ?? false;
+  const beschikbaar = localBeschikbaarheid[key]?.[langeDag]?.[shift] ?? false;
   if (beschikbaar) {
     return { backgroundColor: "#90ee90" }; // lichtgroen
   }
