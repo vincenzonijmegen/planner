@@ -4,21 +4,21 @@ import React, { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 import * as XLSX from "xlsx";
 
-// Zorg dat deze configuratiebestanden daadwerkelijk bestaan of pas het pad aan indien nodig
 import {
   SUPABASE_PROJECT_URL,
   SUPABASE_API_KEY,
   SUPABASE_BUCKET
-} from "../config";
+} from "./config";
 
 import {
   getShiftCountPerMedewerker,
   importeerBeschikbaarheidKnop,
   importeerLoonkostenKnop
-} from "../utils/plannerHelpers";
-import { dagMap } from "../utils/dagen";
-import { exportToPDF } from "../utils/exportToPDF";
-import { kleurSchema } from "../utils/kleurSchema";
+} from "./utils/plannerHelpers";
+
+import { dagMap } from "./utils/dagen";
+import { exportToPDF } from "./utils/exportToPDF";
+import { kleurSchema } from "./utils/kleurSchema";
 
 const supabase = createClient(SUPABASE_PROJECT_URL, SUPABASE_API_KEY);
 const dagen = ["ma", "di", "wo", "do", "vr", "za", "zo"];
@@ -294,5 +294,6 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, pla
           </div>
         </div>
       )}
-    </div> )/* sluit de <div className="p-4 bg-gray-100"> */}
-  ;
+    </div>
+  );
+}
