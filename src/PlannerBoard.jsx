@@ -470,8 +470,8 @@ async function handleExcelUploadToStorage(e) {
     } else {
       const errorText = await response.text();
       console.error("❌ Supabase foutmelding (Excel):", errorText);
-      alert("Fout bij uploaden: " + response.statusText + "
-" + errorText);
+      alert(`Fout bij uploaden: ${response.statusText}
+${errorText}`);
     }
   };
 
