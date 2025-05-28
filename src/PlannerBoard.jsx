@@ -344,7 +344,7 @@ ${errorText}`);
         {dagen.map((dag) =>
           shifts.map((shift) => {
             const entry = planning[m.naam]?.[dag]?.[shift];
-            const beschikbaar = beschikbaarheid?.[naamKey]?.[dagMap[dag]]?.[shift];
+            const beschikbaar = localBeschikbaarheid?.[naamKey]?.[dagMap[dag]]?.[shift];
 
             let text = "";
             let bgColor = "#ffffff";
