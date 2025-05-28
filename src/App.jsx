@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import PlannerBoard from "./PlannerBoard";
-import { SUPABASE_PUBLIC_BASE } from "./config";
+import { SUPABASE_PROJECT_URL } from "./config";
 
 export default function App() {
   const [planning, setPlanning] = useState({});
@@ -9,13 +9,16 @@ export default function App() {
   const [totaleLoonkosten, setTotaleLoonkosten] = useState(0);
 
   const fetchJSON = async (bestandsnaam, setFunctie) => {
+    const SUPABASE_PUBLIC_BASE = `${SUPABASE_PROJECT_URL}/storage/v1/object/public/plannerdata`;
+    const url = `${SUPABASE_PUBLIC_BASE}/${bestandsnaam}`;
     try {
-      const res = await fetch(`${SUPABASE_PUBLIC_BASE}/${bestandsnaam}`);
+      const res = await fetch(url);
       if (!res.ok) throw new Error(`${bestandsnaam} niet gevonden`);
       const json = await res.json();
       setFunctie(json);
     } catch (err) {
-      console.error(`Fout bij laden van ${bestandsnaam}:`, err);
+      console.error(`❌ Fout bij laden van ${bestandsnaam}:`, err.message);
+      alert(`Fout bij ophalen van ${bestandsnaam}`);
     }
   };
 
