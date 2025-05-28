@@ -315,8 +315,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, pla
             </div>
           </div>
         </div>
-      )}
-
+       )}
     </div> {/* sluit de <div className="p-4 bg-gray-100"> */}
   );
 }
