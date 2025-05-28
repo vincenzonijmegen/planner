@@ -403,7 +403,7 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
 }
 import * as XLSX from "xlsx";
 
-import { SUPABASE_STORAGE_URL, SUPABASE_BUCKET, SUPABASE_API_KEY } from "./config";
+
 
 async function handleExcelUploadToStorage(e) {
   const file = e.target.files[0];
@@ -440,22 +440,26 @@ async function handleExcelUploadToStorage(e) {
 }
 
 async function handleBeschikbaarheidUpload(e) {
-  import { SUPABASE_STORAGE_URL } from "./config";
-  import { SUPABASE_BUCKET } from "./config";
-  import { SUPABASE_API_KEY } from "./config";
-
   const file = e.target.files[0];
   const reader = new FileReader();
 
   reader.onload = async (evt) => {
-    const blob = new Blob([evt.target.result], { type: "application/json" });
+    let json;
+    try {
+      json = JSON.parse(evt.target.result);
+    } catch (err) {
+      alert("Ongeldige JSON: kan beschikbaarheid niet parsen.");
+      return;
+    }
+
+    const blob = new Blob([JSON.stringify(json, null, 2)], { type: "application/json" });
 
     const response = await fetch(
       `${SUPABASE_STORAGE_URL}/public/${SUPABASE_BUCKET}/beschikbaarheid.json`,
       {
         method: "PUT",
         headers: {
-          "Authorization": `Bearer ${SUPABASE_API_KEY}`,
+          Authorization: `Bearer ${SUPABASE_API_KEY}`,
           "Content-Type": "application/json",
           "x-upsert": "true"
         },
