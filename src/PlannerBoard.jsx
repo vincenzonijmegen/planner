@@ -448,7 +448,7 @@ async function handleExcelUploadToStorage(e) {
     const parsed = XLSX.utils.sheet_to_json(sheet);
 
     const blob = new Blob([JSON.stringify(parsed, null, 2)], { type: "application/json" });
-    const url = `${SUPABASE_STORAGE_URL}/public/${SUPABASE_BUCKET}/planning.json`;
+    const url = `${SUPABASE_STORAGE_URL}/${SUPABASE_BUCKET}/planning.json`;
 
     console.log("🔐 API-key:", SUPABASE_API_KEY);
     console.log("📁 Upload naar:", url);
@@ -491,7 +491,7 @@ async function handleBeschikbaarheidUpload(e) {
     }
 
     const blob = new Blob([JSON.stringify(json, null, 2)], { type: "application/json" });
-    const url = `${SUPABASE_STORAGE_URL}/public/${SUPABASE_BUCKET}/beschikbaarheid.json`;
+    const url = `${SUPABASE_STORAGE_URL}/${SUPABASE_BUCKET}/beschikbaarheid.json`;
 
     console.log("🔐 API-key:", SUPABASE_API_KEY);
     console.log("📁 Upload naar:", url);
