@@ -65,8 +65,14 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
         },
         body: blob
       });
-      if (response.ok) alert(`${targetFileName} geüpload!`);
-      else alert(`Fout bij uploaden van ${targetFileName}: ${response.statusText}`);
+      if (response.ok) {
+        alert(`${targetFileName} geüpload!`);
+      } else {
+        const errorText = await response.text();
+        console.error("❌ Supabase foutmelding:", errorText);
+        alert(`Fout bij uploaden van ${targetFileName}: ${response.statusText}
+${errorText}`);
+      }
     };
     reader.readAsText(file);
   };
