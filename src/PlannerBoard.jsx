@@ -29,6 +29,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, pla
   const [popup, setPopup] = useState(null);
   const [localBeschikbaarheid, setLocalBeschikbaarheid] = useState(beschikbaarheidProp);
   const [medewerkers, setMedewerkers] = useState([]);
+  const [isLoaded, setIsLoaded] = useState(false);
   const shiftCountPerMedewerker = getShiftCountPerMedewerker(planning);
 
   useEffect(() => {
@@ -56,6 +57,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, pla
       }
     }
     fetchGegevens();
+    setIsLoaded(true);
   }, [setPlanning]);
 
 async function opslaanNaarSupabase() {
@@ -87,6 +89,8 @@ async function opslaanNaarSupabase() {
 }
 
 
+
+  if (!isLoaded) return <div className="p-4 text-gray-500">⏳ Bezig met laden...</div>;
 
   return (
     <div className="p-4 bg-gray-100">
