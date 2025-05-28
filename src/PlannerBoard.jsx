@@ -25,10 +25,7 @@ const dagen = ["ma", "di", "wo", "do", "vr", "za", "zo"];
 const shifts = [1, 2];
 
 export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
-  const [planning, setPlanning] = useState(() => {
-    const local = localStorage.getItem("planning");
-    return local ? JSON.parse(local) : {};
-  });
+  const [planning, setPlanning] = useState({});
   const [loonkostenPerUur, setLoonkostenPerUur] = useState({});
   const [popup, setPopup] = useState(null);
   const [localBeschikbaarheid, setLocalBeschikbaarheid] = useState(beschikbaarheidProp);
@@ -62,6 +59,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
       }
     }
     fetchGegevens();
+    // wacht met tonen tot alle data is geladen
     setIsLoaded(true);
   }, []);
 
