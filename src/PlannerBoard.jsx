@@ -316,5 +316,3 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, pla
           </div>
         </div>
       )}
-
-
