@@ -29,9 +29,9 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
       const blob = new Blob([JSON.stringify(json)], { type: "application/json" });
       
 
-      const key = process.env.REACT_APP_SUPABASE_API_KEY;
+      const key = SUPABASE_API_KEY;
       if (!key) {
-        console.error("❌ VITE_SUPABASE_API_KEY ontbreekt in de omgeving.");
+        console.error("❌ SUPABASE_API_KEY ontbreekt in config.js of omgevingsvariabele.");
         alert("Upload mislukt: API key ontbreekt.");
         return;
       }
