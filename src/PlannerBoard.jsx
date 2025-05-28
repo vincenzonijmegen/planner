@@ -1,4 +1,4 @@
-// ✅ Complete aangepaste JSX inclusief volledige layout, knoppenstructuur en planningsrooster
+// ✅ Complete aangepaste JSX inclusief volledige layout, knoppenstructuur, loonkostenoverzicht en planningsrooster
 
 import React, { useState } from "react";
 import { createClient } from "@supabase/supabase-js";
@@ -125,6 +125,85 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, pla
         </label>
       </div>
 
+      {/* 🧾 Totaaloverzicht loonkosten en functieverdeling */}
+      {medewerkers.length > 0 && (
+        <div className="overflow-x-auto mb-4">
+          <table className="text-xs border-collapse w-full bg-white shadow">
+            <thead className="sticky top-0 bg-white z-10 shadow-sm">
+              <tr>
+                <th className="border px-2 py-1 w-60 text-left">Type</th>
+                {dagen.map((dag) =>
+                  shifts.map((shift) => (
+                    <th key={`${dag}-${shift}`} className="border px-2 py-1 text-center" style={{ borderLeftWidth: shift === 1 ? '2px' : undefined }}>
+                      {dag} {shift}
+                    </th>
+                  ))
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="border px-2 py-1 font-semibold bg-gray-100">Totaal ingepland</td>
+                {dagen.map((dag) =>
+                  shifts.map((shift) => {
+                    const totaal = medewerkers.filter((m) => {
+                      const entry = planning[m.naam]?.[dag]?.[shift];
+                      return entry?.functie === "ijsbereider" || entry?.functie === "ijsvoorbereider" || entry?.functie === "schepper";
+                    }).length;
+                    return (
+                      <td
+                        key={`Totaal-${dag}-${shift}`}
+                        className="border px-2 py-1 text-center bg-gray-50 font-semibold"
+                        style={{ borderLeftWidth: shift === 1 ? '2px' : undefined }}
+                      >
+                        {totaal}
+                      </td>
+                    );
+                  })
+                )}
+              </tr>
+              {["Bereiders", "Voorbereiders", "Scheppers", "Kosten"].map((type) => (
+                <tr key={type}>
+                  <td className="border px-2 py-1 font-semibold">{type}</td>
+                  {dagen.map((dag) =>
+                    shifts.map((shift) => {
+                      let value = 0;
+                      if (type === "Kosten") {
+                        value = medewerkers.reduce((totaal, m) => {
+                          const entry = planning[m.naam]?.[dag]?.[shift];
+                          if (!entry) return totaal;
+                          let uren = 6;
+                          if (entry.soort === "standby") uren = 4;
+                          else if (entry.soort === "laat") uren = 4;
+                          const leeftijd = typeof m.leeftijd === "number" ? m.leeftijd : 18;
+                          const uurloon = loonkostenPerUur[leeftijd] ?? 15;
+                          return totaal + uren * uurloon;
+                        }, 0);
+                      } else {
+                        const functieMap = {
+                          Bereiders: "ijsbereider",
+                          Voorbereiders: "ijsvoorbereider",
+                          Scheppers: "schepper",
+                        };
+                        const functie = functieMap[type];
+                        value = medewerkers.filter(
+                          (m) => planning[m.naam]?.[dag]?.[shift]?.functie === functie
+                        ).length;
+                      }
+                      return (
+                        <td key={`${type}-${dag}-${shift}`} className="border px-2 py-1 text-center" style={{ borderLeftWidth: shift === 1 ? '2px' : undefined }}>
+                          {type === "Kosten" ? `€ ${Math.round(value)}` : value}
+                        </td>
+                      );
+                    })
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
       {medewerkers.length > 0 && (
         <table className="table-fixed border w-full bg-white text-xs font-sans">
           <thead>
@@ -151,7 +230,6 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, pla
                     shifts.map((shift) => {
                       const entry = planning[m.naam]?.[dag]?.[shift];
                       const beschikbaar = localBeschikbaarheid?.[naamKey]?.[dagMap[dag]]?.[shift];
-
                       let text = "";
                       let bgColor = "#ffffff";
                       let color = "#000000";
@@ -238,6 +316,3 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, pla
           </div>
         </div>
       )}
-    </div>
-  );
-}
