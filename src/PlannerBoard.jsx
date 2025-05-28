@@ -1,4 +1,3 @@
-import * as XLSX from "xlsx";
 import React, { useState, useEffect } from "react";
 
 import { SUPABASE_PROJECT_URL, SUPABASE_API_KEY, SUPABASE_BUCKET, SUPABASE_STORAGE_URL, SUPABASE_PUBLIC_BASE } from "./config";
@@ -28,7 +27,7 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
         return;
       }
       const blob = new Blob([JSON.stringify(json)], { type: "application/json" });
-      import { SUPABASE_PUBLIC_BASE, SUPABASE_STORAGE_URL, SUPABASE_BUCKET, SUPABASE_API_KEY } from "./config";
+      
 
       const key = process.env.REACT_APP_SUPABASE_API_KEY;
       if (!key) {
@@ -435,7 +434,6 @@ ${errorText}`);
     </div>
   );
 }
-// verplaatst naar de top voor consistentie
 
 
 
