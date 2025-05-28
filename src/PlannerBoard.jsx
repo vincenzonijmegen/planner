@@ -36,7 +36,17 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, pla
       const bestanden = ["planning.json", "beschikbaarheid.json", "loonkosten.json"];
       for (const bestand of bestanden) {
         const { data, error } = await supabase.storage.from(SUPABASE_BUCKET).download(bestand);
-        if (!error && data) {
+        if (error) {
+          if (error.status === 404) {
+            console.warn(`⛔ Bestand ${bestand} niet gevonden, wordt overgeslagen.`);
+            continue;
+          } else {
+            console.error(`❌ Fout bij ophalen ${bestand}:`, error.message);
+            alert(`Fout bij ophalen van ${bestand}: ${error.message}`);
+            continue;
+          }
+        }
+        if (data) {
           const text = await data.text();
           const json = JSON.parse(text);
           if (bestand === "planning.json") setPlanning(json);
