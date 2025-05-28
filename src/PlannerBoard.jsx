@@ -1,22 +1,24 @@
 // ✅ Complete aangepaste JSX inclusief volledige layout, knoppenstructuur, loonkostenoverzicht en planningsrooster
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 import * as XLSX from "xlsx";
 
+// Zorg dat deze configuratiebestanden daadwerkelijk bestaan of pas het pad aan indien nodig
 import {
   SUPABASE_PROJECT_URL,
   SUPABASE_API_KEY,
   SUPABASE_BUCKET
-} from "./config";
+} from "../config";
+
 import {
   getShiftCountPerMedewerker,
   importeerBeschikbaarheidKnop,
   importeerLoonkostenKnop
-} from "./utils/plannerHelpers";
-import { dagMap } from "./utils/dagen";
-import { exportToPDF } from "./utils/exportToPDF";
-import { kleurSchema } from "./utils/kleurSchema";
+} from "../utils/plannerHelpers";
+import { dagMap } from "../utils/dagen";
+import { exportToPDF } from "../utils/exportToPDF";
+import { kleurSchema } from "../utils/kleurSchema";
 
 const supabase = createClient(SUPABASE_PROJECT_URL, SUPABASE_API_KEY);
 const dagen = ["ma", "di", "wo", "do", "vr", "za", "zo"];
@@ -29,54 +31,22 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, pla
   const [medewerkers, setMedewerkers] = useState([]);
   const shiftCountPerMedewerker = getShiftCountPerMedewerker(planning);
 
-  function updatePlanning(functie, soort) {
-    const { medewerker, dag, shift } = popup;
-    setPlanning((prev) => {
-      const nieuw = { ...prev };
-      if (!nieuw[medewerker]) nieuw[medewerker] = {};
-      if (!nieuw[medewerker][dag]) nieuw[medewerker][dag] = {};
-      nieuw[medewerker][dag][shift] = { functie, soort };
-      localStorage.setItem("planning", JSON.stringify(nieuw));
-      return nieuw;
-    });
-    setPopup(null);
-  }
-
-  async function opslaanNaarSupabase() {
-    const bestanden = {
-      "planning.json": planning,
-      "beschikbaarheid.json": localBeschikbaarheid
-    };
-    for (const [naam, inhoud] of Object.entries(bestanden)) {
-      const blob = new Blob([JSON.stringify(inhoud, null, 2)], { type: "application/json" });
-      const { error } = await supabase.storage.from(SUPABASE_BUCKET).upload(naam, blob, {
-        contentType: "application/json",
-        upsert: true
-      });
-      if (error) {
-        console.error(`❌ Fout bij uploaden ${naam}:`, error.message);
-        alert(`Fout bij uploaden van ${naam}: ${error.message}`);
-        return;
+  useEffect(() => {
+    async function fetchGegevens() {
+      const bestanden = ["planning.json", "beschikbaarheid.json", "loonkosten.json"];
+      for (const bestand of bestanden) {
+        const { data, error } = await supabase.storage.from(SUPABASE_BUCKET).download(bestand);
+        if (!error && data) {
+          const text = await data.text();
+          const json = JSON.parse(text);
+          if (bestand === "planning.json") setPlanning(json);
+          if (bestand === "beschikbaarheid.json") setLocalBeschikbaarheid(json);
+          if (bestand === "loonkosten.json") setLoonkostenPerUur(json);
+        }
       }
     }
-    alert("✅ Alles succesvol opgeslagen naar Supabase!");
-  }
-
-  async function downloadJSON(filename) {
-    try {
-      const { data, error } = await supabase.storage.from(SUPABASE_BUCKET).download(filename);
-      if (error || !data) throw new Error("Bestand niet gevonden");
-      const url = URL.createObjectURL(data);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } catch (err) {
-      alert(`Download mislukt voor ${filename}`);
-    }
-  }
+    fetchGegevens();
+  }, [setPlanning]);
 
   return (
     <div className="p-4 bg-gray-100">
@@ -289,7 +259,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, pla
         </table>
       )}
 
-           {popup && (
+{popup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-4 rounded shadow-md w-[400px]">
             <h2 className="font-bold mb-4 text-center">
@@ -324,6 +294,5 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, pla
           </div>
         </div>
       )}
-</div> )/* sluit de <div className="p-4 bg-gray-100"> */}
-  
-
+    </div> )/* sluit de <div className="p-4 bg-gray-100"> */}
+  ;
