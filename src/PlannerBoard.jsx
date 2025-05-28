@@ -17,7 +17,9 @@ const shifts = [1, 2];
 const SUPABASE_OVERRIDE_UPLOAD_KEY = null; // of een geldige key string voor test
 
 
-export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaarheidProp, planning, setPlanning, onTotalLoonkostenChange }) {
+
+export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, planning, setPlanning, onTotalLoonkostenChange }) {
+  const [medewerkers, setMedewerkers] = useState([]);
   const [loonkostenPerUur, setLoonkostenPerUur] = useState({});
   const [popup, setPopup] = useState(null);
   const [localBeschikbaarheid, setLocalBeschikbaarheid] = useState(beschikbaarheidProp);
