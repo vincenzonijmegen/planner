@@ -19,11 +19,27 @@ const SUPABASE_OVERRIDE_UPLOAD_KEY = null; // of een geldige key string voor tes
 
 
 export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, planning, setPlanning, onTotalLoonkostenChange }) {
-  const [medewerkers, setMedewerkers] = useState([]);
   const [loonkostenPerUur, setLoonkostenPerUur] = useState({});
   const [popup, setPopup] = useState(null);
   const [localBeschikbaarheid, setLocalBeschikbaarheid] = useState(beschikbaarheidProp);
+  const [medewerkers, setMedewerkers] = useState([]);
   const shiftCountPerMedewerker = getShiftCountPerMedewerker(planning);
+
+  // ✅ HIER is de correct geplaatste update-functie
+  function updatePlanning(functie, soort) {
+    const { medewerker, dag, shift } = popup;
+    setPlanning((prev) => {
+      const nieuw = { ...prev };
+      if (!nieuw[medewerker]) nieuw[medewerker] = {};
+      if (!nieuw[medewerker][dag]) nieuw[medewerker][dag] = {};
+      nieuw[medewerker][dag][shift] = { functie, soort };
+      localStorage.setItem("planning", JSON.stringify(nieuw));
+      return nieuw;
+    });
+    setPopup(null);
+  }
+  
+
 
 const uploadJSON = async (file, targetFileName) => {
   console.log("▶️ SDK upload gestart via Supabase");
