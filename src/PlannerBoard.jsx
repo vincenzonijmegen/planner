@@ -46,6 +46,16 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
         jsonType: typeof json
       });
 
+      console.error("🔍 Supabase fetch-payload:", {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${key}`,
+          "Content-Type": "application/json",
+          "x-upsert": "true"
+        },
+        body: blob
+      });
+
       const response = await fetch(`${SUPABASE_PUBLIC_BASE}/${targetFileName}`, {
         method: "PUT",
         headers: {
