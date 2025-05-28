@@ -1,9 +1,15 @@
-import React, { useState, useEffect } from "react";
+// ✅ Complete aangepaste JSX inclusief nieuwe knoppenstructuur,
+// exclusie van medewerkers.json en automatische Supabase upload
+
+import React, { useState } from "react";
 import { createClient } from "@supabase/supabase-js";
+import * as XLSX from "xlsx";
 
-const supabase = createClient(SUPABASE_PROJECT_URL, SUPABASE_API_KEY);
-
-import { SUPABASE_PROJECT_URL, SUPABASE_API_KEY, SUPABASE_BUCKET } from './config';
+import {
+  SUPABASE_PROJECT_URL,
+  SUPABASE_API_KEY,
+  SUPABASE_BUCKET
+} from "./config";
 import {
   getShiftCountPerMedewerker,
   importeerBeschikbaarheidKnop,
@@ -12,11 +18,10 @@ import {
 import { dagMap } from "./utils/dagen";
 import { exportToPDF } from "./utils/exportToPDF";
 import { kleurSchema } from "./utils/kleurSchema";
+
+const supabase = createClient(SUPABASE_PROJECT_URL, SUPABASE_API_KEY);
 const dagen = ["ma", "di", "wo", "do", "vr", "za", "zo"];
 const shifts = [1, 2];
-const SUPABASE_OVERRIDE_UPLOAD_KEY = null; // of een geldige key string voor test
-
-
 
 export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, planning, setPlanning, onTotalLoonkostenChange }) {
   const [loonkostenPerUur, setLoonkostenPerUur] = useState({});
@@ -25,7 +30,6 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, pla
   const [medewerkers, setMedewerkers] = useState([]);
   const shiftCountPerMedewerker = getShiftCountPerMedewerker(planning);
 
-  // ✅ HIER is de correct geplaatste update-functie
   function updatePlanning(functie, soort) {
     const { medewerker, dag, shift } = popup;
     setPlanning((prev) => {
@@ -38,64 +42,42 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, pla
     });
     setPopup(null);
   }
-  
 
-
-const uploadJSON = async (file, targetFileName) => {
-  console.log("▶️ SDK upload gestart via Supabase");
-  const reader = new FileReader();
-
-  reader.onload = async (evt) => {
-    let json;
-    try {
-      json = JSON.parse(evt.target.result);
-    } catch (e) {
-      alert("Ongeldige JSON: bestand kon niet geparsed worden.");
-      return;
-    }
-
-    const blob = new Blob([JSON.stringify(json, null, 2)], {
-      type: "application/json",
-    });
-
-    console.log("📦 Uploaden naar Supabase via SDK:", targetFileName);
-
-    const { data, error } = await supabase.storage
-      .from(SUPABASE_BUCKET) // plannerdata
-      .upload(targetFileName, blob, {
+  async function opslaanNaarSupabase() {
+    const bestanden = {
+      "planning.json": planning,
+      "beschikbaarheid.json": localBeschikbaarheid
+    };
+    for (const [naam, inhoud] of Object.entries(bestanden)) {
+      const blob = new Blob([JSON.stringify(inhoud, null, 2)], { type: "application/json" });
+      const { error } = await supabase.storage.from(SUPABASE_BUCKET).upload(naam, blob, {
         contentType: "application/json",
-        upsert: true,
+        upsert: true
       });
-
-    if (error) {
-      console.error("❌ Supabase foutmelding:", error);
-      alert(`Fout bij uploaden van ${targetFileName}: ${error.message}`);
-    } else {
-      alert(`${targetFileName} succesvol geüpload!`);
-      console.log("✅ Upload succesvol:", data);
+      if (error) {
+        console.error(`❌ Fout bij uploaden ${naam}:`, error.message);
+        alert(`Fout bij uploaden van ${naam}: ${error.message}`);
+        return;
+      }
     }
-  };
+    alert("✅ Alles succesvol opgeslagen naar Supabase!");
+  }
 
-  reader.readAsText(file);
-};
-
-  const downloadJSON = async (filename) => {
+  async function downloadJSON(filename) {
     try {
-      const SUPABASE_PUBLIC_BASE = `${SUPABASE_PROJECT_URL}/storage/v1/object/public/plannerdata`;
-      //const res = await fetch(`${SUPABASE_PUBLIC_BASE}/${filename}`);
-      if (!res.ok) throw new Error("Bestand niet gevonden");
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
+      const { data, error } = await supabase.storage.from(SUPABASE_BUCKET).download(filename);
+      if (error || !data) throw new Error("Bestand niet gevonden");
+      const url = URL.createObjectURL(data);
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", filename);
+      link.download = filename;
       document.body.appendChild(link);
       link.click();
       link.remove();
     } catch (err) {
       alert(`Download mislukt voor ${filename}`);
     }
-  };
+  }
 
   return (
     <div className="p-4 bg-gray-100">
