@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(SUPABASE_PROJECT_URL, SUPABASE_API_KEY);
 
 import { SUPABASE_PROJECT_URL, SUPABASE_API_KEY, SUPABASE_BUCKET, SUPABASE_STORAGE_URL, SUPABASE_PUBLIC_BASE } from "./config";
 import {
@@ -20,76 +23,42 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
   const [localBeschikbaarheid, setLocalBeschikbaarheid] = useState(beschikbaarheidProp);
   const shiftCountPerMedewerker = getShiftCountPerMedewerker(planning);
 
-  const uploadJSON = async (file, targetFileName) => {
-    const reader = new FileReader();
-    reader.onload = async (evt) => {
-      let json;
-      try {
-        json = JSON.parse(evt.target.result);
-      } catch (e) {
-        alert("Ongeldige JSON: bestand kon niet geparsed worden.");
-        return;
-      }
-      const blob = new Blob([JSON.stringify(json)], { type: "application/json" });
-      
+const uploadJSON = async (file, targetFileName) => {
+  const reader = new FileReader();
+  reader.onload = async (evt) => {
+    let json;
+    try {
+      json = JSON.parse(evt.target.result);
+    } catch (e) {
+      alert("Ongeldige JSON: bestand kon niet geparsed worden.");
+      return;
+    }
 
-      const key = SUPABASE_API_KEY;
-      if (!key) {
-        console.error("❌ SUPABASE_API_KEY ontbreekt in config.js of omgevingsvariabele.");
-        alert("Upload mislukt: API key ontbreekt.");
-        return;
-      }
-      console.log("🔐 API-key:", key);
-      console.log("📁 Upload naar:", `${SUPABASE_PUBLIC_BASE}/${targetFileName}`);
-      console.log("📦 JSON inhoud:", json);
-      console.error("🔍 Uploaddetails:", {
-        bestand: targetFileName,
-        apiKeyLeeg: !key,
-        blobGrootte: blob.size,
-        jsonType: typeof json
+    const blob = new Blob([JSON.stringify(json, null, 2)], {
+      type: "application/json",
+    });
+
+    console.log("📦 JSON inhoud:", json);
+    console.log("📁 Uploaden naar Supabase bucket:", SUPABASE_BUCKET, "als:", targetFileName);
+
+    const { data, error } = await supabase.storage
+      .from(SUPABASE_BUCKET)
+      .upload(targetFileName, blob, {
+        contentType: "application/json",
+        upsert: true,
       });
 
-      console.error("🔍 Supabase fetch-payload:", {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${SUPABASE_API_KEY}`,
-          "Content-Type": "application/json",
-          "x-upsert": "true"
-        },
-        body: blob
-      });
-
-      console.error("🔍 Supabase fetch-payload:", {
-        method: "PUT",
-        url: `${SUPABASE_PUBLIC_BASE}/${targetFileName}`,
-        headers: {
-          Authorization: `Bearer ${key}`,
-          "Content-Type": "application/json",
-          "x-upsert": "true"
-        },
-        bodyPreview: await blob.text()
-      });
-
-      const response = await fetch(`${SUPABASE_PUBLIC_BASE}/${targetFileName}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${key}`,
-          "Content-Type": "application/json",
-          "x-upsert": "true"
-        },
-        body: blob
-      });
-      if (response.ok) {
-        alert(`${targetFileName} geüpload!`);
-      } else {
-        const errorText = await response.text();
-        console.error("❌ Supabase foutmelding:", errorText);
-        alert(`Fout bij uploaden van ${targetFileName}: ${response.statusText}
-${errorText}`);
-      }
-    };
-    reader.readAsText(file);
+    if (error) {
+      console.error("❌ Supabase foutmelding:", error);
+      alert(`Fout bij uploaden van ${targetFileName}: ${error.message}`);
+    } else {
+      console.log("✅ Upload succesvol:", data);
+      alert(`${targetFileName} geüpload!`);
+    }
   };
+
+  reader.readAsText(file);
+};
 
   const downloadJSON = async (filename) => {
     try {
