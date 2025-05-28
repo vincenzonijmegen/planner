@@ -49,20 +49,27 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, pla
   }, [setPlanning]);
 
 async function opslaanNaarSupabase() {
-  const bestanden = {
-    "planning.json": planning,
-    "beschikbaarheid.json": localBeschikbaarheid,
-    "loonkosten.json": loonkostenPerUur
-  };
-  for (const [naam, inhoud] of Object.entries(bestanden)) {
-    const blob = new Blob([JSON.stringify(inhoud, null, 2)], { type: "application/json" });
-    const { error } = await supabase.storage.from(SUPABASE_BUCKET).upload(naam, blob, {
-      contentType: "application/json",
-      upsert: true
-    });
-    if (error) {
-      console.error(`❌ Fout bij uploaden ${naam}:`, error.message);
-      alert(`Fout bij uploaden van ${naam}: ${error.message}`);
+  const bestanden = [
+    { naam: "planning.json", inhoud: planning },
+    { naam: "beschikbaarheid.json", inhoud: localBeschikbaarheid },
+    { naam: "loonkosten.json", inhoud: loonkostenPerUur }
+  ];
+
+  for (const bestand of bestanden) {
+    try {
+      const blob = new Blob([JSON.stringify(bestand.inhoud, null, 2)], { type: "application/json" });
+      const { error } = await supabase.storage.from(SUPABASE_BUCKET).upload(bestand.naam, blob, {
+        contentType: "application/json",
+        upsert: true
+      });
+      if (error) {
+        console.error(`❌ Fout bij uploaden ${bestand.naam}:`, error.message);
+        alert(`Fout bij uploaden van ${bestand.naam}: ${error.message}`);
+        return;
+      }
+    } catch (err) {
+      console.error(`❌ Fout tijdens verwerking van ${bestand.naam}:`, err);
+      alert(`Verwerkingsfout voor ${bestand.naam}: ${err.message}`);
       return;
     }
   }
