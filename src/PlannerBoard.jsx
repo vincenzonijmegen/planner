@@ -52,7 +52,7 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
       console.error("🔍 Supabase fetch-payload:", {
         method: "PUT",
         headers: {
-          Authorization: `Bearer ${SUPABASE_SERVICE_KEY || SUPABASE_API_KEY}`,
+          Authorization: `Bearer ${SUPABASE_API_KEY}`,
           "Content-Type": "application/json",
           "x-upsert": "true"
         },
