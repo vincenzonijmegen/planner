@@ -59,39 +59,53 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
       }
     }
     fetchGegevens();
-    // wacht met tonen tot alle data is geladen
-    setIsLoaded(true);
   }, []);
 
-async function opslaanNaarSupabase() {
-  const bestanden = [
-    { naam: "planning.json", inhoud: planning },
-    { naam: "beschikbaarheid.json", inhoud: localBeschikbaarheid },
-    { naam: "loonkosten.json", inhoud: loonkostenPerUur }
-  ];
+  useEffect(() => {
+    if (!localBeschikbaarheid || Object.keys(localBeschikbaarheid).length === 0) return;
 
-  for (const bestand of bestanden) {
-    try {
-      const blob = new Blob([JSON.stringify(bestand.inhoud, null, 2)], { type: "application/json" });
-      const { error } = await supabase.storage.from(SUPABASE_BUCKET).upload(bestand.naam, blob, {
-        contentType: "application/json",
-        upsert: true
-      });
-      if (error) {
-        console.error(`❌ Fout bij uploaden ${bestand.naam}:`, error.message);
-        alert(`Fout bij uploaden van ${bestand.naam}: ${error.message}`);
+    const gegenereerd = Object.entries(localBeschikbaarheid).map(([naamKey]) => {
+      const origineleNaam = naamKey;
+      return {
+        naam: origineleNaam,
+        leeftijd: 18,
+        maxShifts: 3
+      };
+    });
+
+    if (gegenereerd.length > 0) {
+      setMedewerkers(gegenereerd);
+    }
+    setIsLoaded(true);
+  }, [localBeschikbaarheid]);
+
+  async function opslaanNaarSupabase() {
+    const bestanden = [
+      { naam: "planning.json", inhoud: planning },
+      { naam: "beschikbaarheid.json", inhoud: localBeschikbaarheid },
+      { naam: "loonkosten.json", inhoud: loonkostenPerUur }
+    ];
+
+    for (const bestand of bestanden) {
+      try {
+        const blob = new Blob([JSON.stringify(bestand.inhoud, null, 2)], { type: "application/json" });
+        const { error } = await supabase.storage.from(SUPABASE_BUCKET).upload(bestand.naam, blob, {
+          contentType: "application/json",
+          upsert: true
+        });
+        if (error) {
+          console.error(`❌ Fout bij uploaden ${bestand.naam}:`, error.message);
+          alert(`Fout bij uploaden van ${bestand.naam}: ${error.message}`);
+          return;
+        }
+      } catch (err) {
+        console.error(`❌ Fout tijdens verwerking van ${bestand.naam}:`, err);
+        alert(`Verwerkingsfout voor ${bestand.naam}: ${err.message}`);
         return;
       }
-    } catch (err) {
-      console.error(`❌ Fout tijdens verwerking van ${bestand.naam}:`, err);
-      alert(`Verwerkingsfout voor ${bestand.naam}: ${err.message}`);
-      return;
     }
+    alert("✅ Alles succesvol opgeslagen naar Supabase!");
   }
-  alert("✅ Alles succesvol opgeslagen naar Supabase!");
-}
-
-
 
   if (!isLoaded) return <div className="p-4 text-gray-500">⏳ Bezig met laden...</div>;
 
