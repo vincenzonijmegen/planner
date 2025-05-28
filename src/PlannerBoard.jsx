@@ -307,7 +307,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
             return (
               <tr key={m.naam}>
                 <td className="border px-4 py-2 text-left whitespace-nowrap w-60 font-bold">
-                  {m.naam} [{m.leeftijd ?? "?"}] ({shiftCountPerMedewerker[m.naam] || 0}/{m.maxShifts ?? "?"})
+                {m.naam.replace(/\b\w/g, c => c.toUpperCase())} [{m.leeftijd ?? "?"}] ({shiftCountPerMedewerker[m.naam] || 0}/{m.maxShifts ?? "?"})
                 </td>
                 {dagen.map((dag) =>
                   shifts.map((shift) => {
