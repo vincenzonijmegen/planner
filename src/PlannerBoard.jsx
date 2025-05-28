@@ -449,24 +449,29 @@ async function handleExcelUploadToStorage(e) {
     const parsed = XLSX.utils.sheet_to_json(sheet);
 
     const blob = new Blob([JSON.stringify(parsed, null, 2)], { type: "application/json" });
+    const url = `${SUPABASE_STORAGE_URL}/public/${SUPABASE_BUCKET}/planning.json`;
 
-    const response = await fetch(
-      `${SUPABASE_STORAGE_URL}/${SUPABASE_BUCKET}/o/planning.json`,
-      {
-        method: "PUT",
-        headers: {
-          "Authorization": `Bearer ${SUPABASE_API_KEY}`,
-          "Content-Type": "application/json",
-          "x-upsert": "true"
-        },
-        body: blob
-      }
-    );
+    console.log("🔐 API-key:", SUPABASE_API_KEY);
+    console.log("📁 Upload naar:", url);
+    console.log("📦 Geparsed Excel:", parsed);
+
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${SUPABASE_API_KEY}`,
+        "Content-Type": "application/json",
+        "x-upsert": "true"
+      },
+      body: blob
+    });
 
     if (response.ok) {
-      alert("Geüpload naar Supabase Storage!");
+      alert("✅ Geüpload naar Supabase Storage!");
     } else {
-      alert("Fout bij uploaden: " + response.statusText);
+      const errorText = await response.text();
+      console.error("❌ Supabase foutmelding (Excel):", errorText);
+      alert("Fout bij uploaden: " + response.statusText + "
+" + errorText);
     }
   };
 
