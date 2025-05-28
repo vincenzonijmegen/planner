@@ -288,6 +288,88 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
           </table>
         </div>
       )}
+    <table className="table-fixed border w-full bg-white text-xs font-sans">
+        <thead>
+          <tr>
+            <th className="border px-4 py-2 text-left w-60">Naam</th>
+            {dagen.map((dag) =>
+              shifts.map((shift) => (
+                <th key={`${dag}-${shift}`} className="border px-2 py-1 text-center">
+                  {dag} {shift}
+                </th>
+              ))
+            )}
+          </tr>
+        </thead>
+        <tbody>
+          {medewerkers.map((m) => {
+            const naamKey = m.naam.trim().toLowerCase();
+            return (
+              <tr key={m.naam}>
+                <td className="border px-4 py-2 text-left whitespace-nowrap w-60 font-bold">
+                  {m.naam} [{m.leeftijd ?? "?"}] ({shiftCountPerMedewerker[m.naam] || 0}/{m.maxShifts ?? "?"})
+                </td>
+                {dagen.map((dag) =>
+                  shifts.map((shift) => {
+                    const entry = planning[m.naam]?.[dag]?.[shift];
+                    const beschikbaar = localBeschikbaarheid?.[naamKey]?.[dagMap[dag]]?.[shift];
+                    let text = "";
+                    let bgColor = "#ffffff";
+                    let color = "#000000";
+
+                    if (entry) {
+                      const kleur = kleurSchema[entry.functie]?.[entry.soort];
+                      bgColor = kleur?.hex || "#ffffff";
+                      color = kleur?.tailwind.includes("text-white") ? "#ffffff" : "#000000";
+                      const labelMap = {
+                        schepper: { vast: "schep", standby: "schep(s)", laat: "schep(l)" },
+                        ijsbereider: { vast: "bereider", standby: "bereider(s)", laat: "bereider(l)" },
+                        ijsvoorbereider: { vast: "prep", standby: "prep(s)", laat: "prep(l)" },
+                      };
+                      text = labelMap[entry.functie]?.[entry.soort] || `${entry.functie} (${entry.soort})`;
+                    } else if (beschikbaar) {
+                      const kleur = kleurSchema.beschikbaar;
+                      bgColor = kleur.hex;
+                      color = kleur.tailwind.includes("text-white") ? "#ffffff" : "#000000";
+                      text = "✓";
+                    }
+
+                    return (
+                      <td
+                        key={`${m.naam}-${dag}-${shift}`}
+                        className="border text-center cursor-pointer"
+                        style={{
+                          borderLeftWidth: shift === 1 ? "2px" : undefined,
+                          backgroundColor: (shift === 1 && !text) ? "#FFFBEB" : (shift === 2 && !text ? "#F0F9FF" : bgColor),
+                          color,
+                          fontWeight: "bold"
+                        }}
+                        onClick={() => {
+                          const entry = planning[m.naam]?.[dag]?.[shift];
+                          if (entry) {
+                            setPlanning((prev) => {
+                              const nieuw = { ...prev };
+                              delete nieuw[m.naam][dag][shift];
+                              if (Object.keys(nieuw[m.naam][dag]).length === 0) delete nieuw[m.naam][dag];
+                              if (Object.keys(nieuw[m.naam]).length === 0) delete nieuw[m.naam];
+                              localStorage.setItem("planning", JSON.stringify(nieuw));
+                              return nieuw;
+                            });
+                          } else {
+                            setPopup({ medewerker: m.naam, dag, shift });
+                          }
+                        }}
+                      >
+                        {text}
+                      </td>
+                    );
+                  })
+                )}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }
