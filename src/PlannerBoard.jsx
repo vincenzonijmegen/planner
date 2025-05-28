@@ -36,15 +36,10 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
         alert("Upload mislukt: API key ontbreekt.");
         return;
       }
-      const response = await fetch(`${SUPABASE_PUBLIC_BASE}/${targetFileName}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${key}`,
-          "Content-Type": "application/json",
-          "x-upsert": "true"
-        },
-        body: blob
-      });
+      console.log("🔐 API-key:", key);
+      console.log("📁 Upload naar:", `${SUPABASE_PUBLIC_BASE}/${targetFileName}`);
+      console.log("📦 JSON inhoud:", json);
+      const response = await fetch(`${SUPABASE_PUBLIC_BASE}/${targetFileName}`;
       if (response.ok) alert(`${targetFileName} geüpload!`);
       else alert(`Fout bij uploaden van ${targetFileName}: ${response.statusText}`);
     };
