@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(SUPABASE_PROJECT_URL, SUPABASE_API_KEY);
 
-import { SUPABASE_PROJECT_URL, SUPABASE_API_KEY, SUPABASE_BUCKET, SUPABASE_STORAGE_URL, SUPABASE_PUBLIC_BASE } from "./config";
+import { SUPABASE_PROJECT_URL, SUPABASE_API_KEY, SUPABASE_BUCKET } from './config';
 import {
   getShiftCountPerMedewerker,
   importeerBeschikbaarheidKnop,
@@ -25,6 +25,7 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
 
 const uploadJSON = async (file, targetFileName) => {
   const reader = new FileReader();
+
   reader.onload = async (evt) => {
     let json;
     try {
@@ -38,11 +39,10 @@ const uploadJSON = async (file, targetFileName) => {
       type: "application/json",
     });
 
-    console.log("📦 JSON inhoud:", json);
-    console.log("📁 Uploaden naar Supabase bucket:", SUPABASE_BUCKET, "als:", targetFileName);
+    console.log("📦 Uploaden naar Supabase via SDK:", targetFileName);
 
     const { data, error } = await supabase.storage
-      .from(SUPABASE_BUCKET)
+      .from(SUPABASE_BUCKET) // plannerdata
       .upload(targetFileName, blob, {
         contentType: "application/json",
         upsert: true,
@@ -52,8 +52,8 @@ const uploadJSON = async (file, targetFileName) => {
       console.error("❌ Supabase foutmelding:", error);
       alert(`Fout bij uploaden van ${targetFileName}: ${error.message}`);
     } else {
+      alert(`${targetFileName} succesvol geüpload!`);
       console.log("✅ Upload succesvol:", data);
-      alert(`${targetFileName} geüpload!`);
     }
   };
 
