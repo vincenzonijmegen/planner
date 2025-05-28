@@ -24,6 +24,7 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
   const shiftCountPerMedewerker = getShiftCountPerMedewerker(planning);
 
 const uploadJSON = async (file, targetFileName) => {
+  console.log("▶️ SDK upload gestart via Supabase");
   const reader = new FileReader();
 
   reader.onload = async (evt) => {
@@ -63,7 +64,7 @@ const uploadJSON = async (file, targetFileName) => {
   const downloadJSON = async (filename) => {
     try {
       const SUPABASE_PUBLIC_BASE = `${SUPABASE_PROJECT_URL}/storage/v1/object/public/plannerdata`;
-      const res = await fetch(`${SUPABASE_PUBLIC_BASE}/${filename}`);
+      //const res = await fetch(`${SUPABASE_PUBLIC_BASE}/${filename}`);
       if (!res.ok) throw new Error("Bestand niet gevonden");
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
@@ -408,85 +409,73 @@ const uploadJSON = async (file, targetFileName) => {
   );
 }
 
-
-
+import * as XLSX from "xlsx"; // indien nog niet geïmporteerd
 
 async function handleExcelUploadToStorage(e) {
   const file = e.target.files[0];
   const reader = new FileReader();
 
   reader.onload = async (evt) => {
-    const workbook = XLSX.read(evt.target.result, { type: "binary" });
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const parsed = XLSX.utils.sheet_to_json(sheet);
+    try {
+      const workbook = XLSX.read(evt.target.result, { type: "binary" });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const parsed = XLSX.utils.sheet_to_json(sheet);
+      const blob = new Blob([JSON.stringify(parsed, null, 2)], {
+        type: "application/json",
+      });
 
-    const blob = new Blob([JSON.stringify(parsed, null, 2)], { type: "application/json" });
-    const url = `${SUPABASE_STORAGE_URL}/${SUPABASE_BUCKET}/planning.json`;
+      const { data, error } = await supabase.storage
+        .from(SUPABASE_BUCKET)
+        .upload("planning.json", blob, {
+          contentType: "application/json",
+          upsert: true,
+        });
 
-    console.log("🔐 API-key:", SUPABASE_API_KEY);
-    console.log("📁 Upload naar:", url);
-    console.log("📦 Geparsed Excel:", parsed);
-
-    const response = await fetch(url, {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${SUPABASE_API_KEY}`,
-        "Content-Type": "application/json",
-        "x-upsert": "true"
-      },
-      body: blob
-    });
-
-    if (response.ok) {
-      alert("✅ Geüpload naar Supabase Storage!");
-    } else {
-      const errorText = await response.text();
-      console.error("❌ Supabase foutmelding (Excel):", errorText);
-      alert(`Fout bij uploaden: ${response.statusText}
-${errorText}`);
+      if (error) {
+        console.error("❌ Supabase foutmelding (Excel):", error.message);
+        alert(`Fout bij uploaden: ${error.message}`);
+      } else {
+        alert("✅ Planning geüpload naar Supabase!");
+        console.log("✅ Upload succesvol:", data);
+      }
+    } catch (err) {
+      console.error("❌ Excel leesfout:", err);
+      alert("Fout bij het inlezen van het Excel-bestand.");
     }
   };
 
   reader.readAsBinaryString(file);
 }
 
+
 async function handleBeschikbaarheidUpload(e) {
   const file = e.target.files[0];
   const reader = new FileReader();
 
   reader.onload = async (evt) => {
-    let json;
     try {
-      json = JSON.parse(evt.target.result);
+      const json = JSON.parse(evt.target.result);
+      const blob = new Blob([JSON.stringify(json, null, 2)], {
+        type: "application/json",
+      });
+
+      const { data, error } = await supabase.storage
+        .from(SUPABASE_BUCKET)
+        .upload("beschikbaarheid.json", blob, {
+          contentType: "application/json",
+          upsert: true,
+        });
+
+      if (error) {
+        console.error("❌ Supabase foutmelding (beschikbaarheid):", error.message);
+        alert(`Fout bij uploaden: ${error.message}`);
+      } else {
+        alert("✅ Beschikbaarheid geüpload naar Supabase!");
+        console.log("✅ Upload succesvol:", data);
+      }
     } catch (err) {
-      alert("Ongeldige JSON: kan beschikbaarheid niet parsen.");
-      return;
-    }
-
-    const blob = new Blob([JSON.stringify(json, null, 2)], { type: "application/json" });
-    const url = `${SUPABASE_STORAGE_URL}/${SUPABASE_BUCKET}/beschikbaarheid.json`;
-
-    console.log("🔐 API-key:", SUPABASE_API_KEY);
-    console.log("📁 Upload naar:", url);
-    console.log("📦 JSON inhoud:", json);
-
-    const response = await fetch(url, {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${SUPABASE_API_KEY}`,
-        "Content-Type": "application/json",
-        "x-upsert": "true"
-      },
-      body: blob
-    });
-
-    if (response.ok) {
-      alert("✅ Beschikbaarheid geüpload naar Supabase!");
-    } else {
-      const errorText = await response.text();
-      console.error("❌ Supabase foutmelding (beschikbaarheid):", errorText);
-      alert(`Fout bij uploaden: ${response.statusText}
-${errorText}`);
+      console.error("❌ JSON leesfout:", err);
+      alert("Fout bij het inlezen van het JSON-bestand.");
     }
   };
 
