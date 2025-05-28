@@ -111,7 +111,7 @@ ${errorText}`);
     <div className="p-4 bg-gray-100">
       <div className="flex flex-wrap gap-2 items-center mb-4">
         {importeerBeschikbaarheidKnop(setLocalBeschikbaarheid)}
-        {React.cloneElement(importeerLoonkostenKnop((loonkosten) => { console.log("Loonkosten ontvangen:", loonkosten); }), {
+        {React.cloneElement(importeerLoonkostenKnop(setLoonkostenPerUur), {
           className: "bg-blue-600 text-white px-4 py-2 rounded shadow"
         })}
 
