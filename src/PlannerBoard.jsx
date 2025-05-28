@@ -409,8 +409,6 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, pla
   );
 }
 
-import * as XLSX from "xlsx"; // indien nog niet geïmporteerd
-
 async function handleExcelUploadToStorage(e) {
   const file = e.target.files[0];
   const reader = new FileReader();
