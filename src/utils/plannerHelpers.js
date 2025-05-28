@@ -26,7 +26,7 @@ export function importeerLoonkostenKnop(setLoonkosten) {
               }
             });
 
-            setLoonkosten(mapping);
+            typeof setLoonkosten === 'function' ? setLoonkosten(mapping) : console.error("❌ setLoonkosten is not a function", setLoonkosten);
             localStorage.setItem("loonkosten", JSON.stringify(mapping));
           };
           reader.readAsArrayBuffer(file);
