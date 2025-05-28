@@ -14,6 +14,7 @@ const shifts = [1, 2];
 
 
 export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaarheidProp, planning, setPlanning, onTotalLoonkostenChange }) {
+  const [loonkostenPerUur, setLoonkostenPerUur] = useState({});
   const [popup, setPopup] = useState(null);
   const [localBeschikbaarheid, setLocalBeschikbaarheid] = useState(beschikbaarheidProp);
   const shiftCountPerMedewerker = getShiftCountPerMedewerker(planning);
