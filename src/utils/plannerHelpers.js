@@ -82,8 +82,13 @@ export function handleBeschikbaarheidUpload(e, setBeschikbaarheid, setMedewerker
     
     
 
-    console.log("✅ Beschikbaarheid ingelezen:", structuur);
-    setBeschikbaarheid(structuur);
+console.log("✅ Beschikbaarheid ingelezen:", structuur);
+if (typeof setBeschikbaarheid === "function") {
+  setBeschikbaarheid(structuur);
+} else {
+  console.error("❌ setBeschikbaarheid is not a function", setBeschikbaarheid);
+}
+
 
     const medewerkersUniek = Array.from(new Set(data.map(r => r.Naam?.trim().toLowerCase()).filter(Boolean)))
       .map((naam) => {
@@ -110,7 +115,12 @@ export function handleBeschikbaarheidUpload(e, setBeschikbaarheid, setMedewerker
         };
       });
 
-    setMedewerkers(medewerkersUniek);
+    if (typeof setMedewerkers === "function") {
+  setMedewerkers(medewerkersUniek);
+} else {
+  console.error("❌ setMedewerkers is not a function", setMedewerkers);
+}
+
     console.log("✅ Medewerkers geladen:", medewerkersUniek);
     localStorage.setItem("medewerkers", JSON.stringify(medewerkersUniek));
   };
@@ -126,13 +136,18 @@ export function importeerBeschikbaarheidKnop(setBeschikbaarheid, setMedewerkers)
         type="file"
         accept=".xlsx"
         className="hidden"
-        onChange={(e) => handleBeschikbaarheidUpload(e, setBeschikbaarheid, setMedewerkers)}
+        onChange={(e) =>
+          handleBeschikbaarheidUpload(
+            e,
+            typeof setBeschikbaarheid === "function" ? setBeschikbaarheid : () => {},
+            typeof setMedewerkers === "function" ? setMedewerkers : () => {}
+          )
+        }
       />
     </label>
   );
 }
 
-// ... (de rest van het bestand blijft ongewijzigd)
 
 
 export function handleFileUpload(e, setVakanties, setMedewerkers, beschikbaarheid) {
