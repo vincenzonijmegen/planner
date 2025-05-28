@@ -39,7 +39,15 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
       console.log("🔐 API-key:", key);
       console.log("📁 Upload naar:", `${SUPABASE_PUBLIC_BASE}/${targetFileName}`);
       console.log("📦 JSON inhoud:", json);
-      const response = await fetch(`${SUPABASE_PUBLIC_BASE}/${targetFileName}`;
+      const response = await fetch(`${SUPABASE_PUBLIC_BASE}/${targetFileName}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${key}`,
+          "Content-Type": "application/json",
+          "x-upsert": "true"
+        },
+        body: blob
+      });
       if (response.ok) alert(`${targetFileName} geüpload!`);
       else alert(`Fout bij uploaden van ${targetFileName}: ${response.statusText}`);
     };
@@ -395,9 +403,7 @@ export default function PlannerBoard({ medewerkers, beschikbaarheid: beschikbaar
 }
 import * as XLSX from "xlsx";
 
-const SUPABASE_STORAGE_URL = "https://edzvwddbrdokwutmxfdx.supabase.co/storage/v1/object";
-const SUPABASE_BUCKET = "plannerdata";
-const SUPABASE_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkenZ3ZGRicmRva3d1dG14ZmR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjQ4MDUsImV4cCI6MjA2Mzc0MDgwNX0.C4SRpBwMvQwqkZXK3ykghLi11rAJtqU1RxFinVm-4a8"; // vervang dit met je echte anon key
+import { SUPABASE_STORAGE_URL, SUPABASE_BUCKET, SUPABASE_API_KEY } from "./config";
 
 async function handleExcelUploadToStorage(e) {
   const file = e.target.files[0];
@@ -436,7 +442,7 @@ async function handleExcelUploadToStorage(e) {
 async function handleBeschikbaarheidUpload(e) {
   const SUPABASE_STORAGE_URL = "https://edzvwddbrdokwutmxfdx.supabase.co/storage/v1/object";
   const SUPABASE_BUCKET = "plannerdata";
-  const SUPABASE_API_KEY = "JOUW_ANON_KEY_HIER"; // vervang dit
+  const SUPABASE_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkenZ3ZGRicmRva3d1dG14ZmR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNjQ4MDUsImV4cCI6MjA2Mzc0MDgwNX0.C4SRpBwMvQwqkZXK3ykghLi11rAJtqU1RxFinVm-4a8"; // vervang dit
 
   const file = e.target.files[0];
   const reader = new FileReader();
