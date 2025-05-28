@@ -119,7 +119,16 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
         <button onClick={opslaanNaarSupabase} className="bg-indigo-600 text-white px-4 py-2 rounded shadow">
           💾 Opslaan naar Supabase
         </button>
-        <button onClick={() => downloadJSON("planning.json")} className="bg-gray-700 text-white px-4 py-2 rounded shadow">
+        <button onClick={() => {
+          const blob = new Blob([JSON.stringify(planning, null, 2)], { type: "application/json" });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = "planning.json";
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        }} className="bg-gray-700 text-white px-4 py-2 rounded shadow">
           ⬇️ Download planning.json
         </button>
         <button
@@ -156,8 +165,53 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
         </label>
       </div>
 
-      {/* 🧾 Totaaloverzicht loonkosten en functieverdeling */}
-      {medewerkers.length > 0 && (
+      {popup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-4 rounded shadow-md w-[400px]">
+            <h2 className="font-bold mb-4 text-center">
+              {popup.medewerker} - {popup.dag} Shift {popup.shift}
+            </h2>
+            <div className="grid grid-cols-3 gap-2">
+              {["ijsbereider", "ijsvoorbereider", "schepper"].flatMap((functie) =>
+                ["vast", "standby", "laat"].map((soort) => {
+                  const label =
+                    soort === "standby"
+                      ? `⏱️ ${functie}`
+                      : soort === "laat"
+                      ? `🌙 ${functie}`
+                      : functie;
+                  return (
+                    <button
+                      key={`${functie}-${soort}`}
+                      className={`${kleurSchema[functie][soort].tailwind} px-3 py-2 rounded font-medium text-sm`}
+                      onClick={() => {
+                        const { medewerker, dag, shift } = popup;
+                        setPlanning((prev) => {
+                          const nieuw = { ...prev };
+                          if (!nieuw[medewerker]) nieuw[medewerker] = {};
+                          if (!nieuw[medewerker][dag]) nieuw[medewerker][dag] = {};
+                          nieuw[medewerker][dag][shift] = { functie, soort };
+                          localStorage.setItem("planning", JSON.stringify(nieuw));
+                          return nieuw;
+                        });
+                        setPopup(null);
+                      }}
+                    >
+                      {label}
+                    </button>
+                  );
+                })
+              )}
+            </div>
+            <div className="mt-4 text-center">
+              <button onClick={() => setPopup(null)} className="text-gray-600 text-sm underline">
+                Annuleren
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    {medewerkers.length > 0 && (
         <div className="overflow-x-auto mb-4">
           <table className="text-xs border-collapse w-full bg-white shadow">
             <thead className="sticky top-0 bg-white z-10 shadow-sm">
@@ -232,127 +286,6 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
               ))}
             </tbody>
           </table>
-        </div>
-      )}
-
-      {medewerkers.length > 0 && (
-        <table className="table-fixed border w-full bg-white text-xs font-sans">
-          <thead>
-            <tr>
-              <th className="border px-4 py-2 text-left w-60">Naam</th>
-              {dagen.map((dag) =>
-                shifts.map((shift) => (
-                  <th key={`${dag}-${shift}`} className="border px-2 py-1 text-center">
-                    {dag} {shift}
-                  </th>
-                ))
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {medewerkers.map((m) => {
-              const naamKey = m.naam.trim().toLowerCase();
-              return (
-                <tr key={m.naam}>
-                  <td className="border px-4 py-2 text-left whitespace-nowrap w-60 font-bold">
-                    {m.naam} [{m.leeftijd ?? "?"}] ({shiftCountPerMedewerker[m.naam] || 0}/{m.maxShifts ?? "?"})
-                  </td>
-                  {dagen.map((dag) =>
-                    shifts.map((shift) => {
-                      const entry = planning[m.naam]?.[dag]?.[shift];
-                      const beschikbaar = localBeschikbaarheid?.[naamKey]?.[dagMap[dag]]?.[shift];
-                      let text = "";
-                      let bgColor = "#ffffff";
-                      let color = "#000000";
-
-                      if (entry) {
-                        const kleur = kleurSchema[entry.functie]?.[entry.soort];
-                        bgColor = kleur?.hex || "#ffffff";
-                        color = kleur?.tailwind.includes("text-white") ? "#ffffff" : "#000000";
-                        const labelMap = {
-                          schepper: { vast: "schep", standby: "schep(s)", laat: "schep(l)" },
-                          ijsbereider: { vast: "bereider", standby: "bereider(s)", laat: "bereider(l)" },
-                          ijsvoorbereider: { vast: "prep", standby: "prep(s)", laat: "prep(l)" },
-                        };
-                        text = labelMap[entry.functie]?.[entry.soort] || `${entry.functie} (${entry.soort})`;
-                      } else if (beschikbaar) {
-                        const kleur = kleurSchema.beschikbaar;
-                        bgColor = kleur.hex;
-                        color = kleur.tailwind.includes("text-white") ? "#ffffff" : "#000000";
-                        text = "✓";
-                      }
-
-                      return (
-                        <td
-                          key={`${m.naam}-${dag}-${shift}`}
-                          className="border text-center cursor-pointer"
-                          style={{
-                            borderLeftWidth: shift === 1 ? "2px" : undefined,
-                            backgroundColor: (shift === 1 && !text) ? "#FFFBEB" : (shift === 2 && !text ? "#F0F9FF" : bgColor),
-                            color,
-                            fontWeight: "bold"
-                          }}
-                          onClick={() => {
-                            const entry = planning[m.naam]?.[dag]?.[shift];
-                            if (entry) {
-                              setPlanning((prev) => {
-                                const nieuw = { ...prev };
-                                delete nieuw[m.naam][dag][shift];
-                                if (Object.keys(nieuw[m.naam][dag]).length === 0) delete nieuw[m.naam][dag];
-                                if (Object.keys(nieuw[m.naam]).length === 0) delete nieuw[m.naam];
-                                localStorage.setItem("planning", JSON.stringify(nieuw));
-                                return nieuw;
-                              });
-                            } else {
-                              setPopup({ medewerker: m.naam, dag, shift });
-                            }
-                          }}
-                        >
-                          {text}
-                        </td>
-                      );
-                    })
-                  )}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      )}
-
-{popup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-4 rounded shadow-md w-[400px]">
-            <h2 className="font-bold mb-4 text-center">
-              {popup.medewerker} - {popup.dag} Shift {popup.shift}
-            </h2>
-            <div className="grid grid-cols-3 gap-2">
-              {["ijsbereider", "ijsvoorbereider", "schepper"].flatMap((functie) =>
-                ["vast", "standby", "laat"].map((soort) => {
-                  const label =
-                    soort === "standby"
-                      ? `⏱️ ${functie}`
-                      : soort === "laat"
-                      ? `🌙 ${functie}`
-                      : functie;
-                  return (
-                    <button
-                      key={`${functie}-${soort}`}
-                      className={`${kleurSchema[functie][soort].tailwind} px-3 py-2 rounded font-medium text-sm`}
-                      onClick={() => updatePlanning(functie, soort)}
-                    >
-                      {label}
-                    </button>
-                  );
-                })
-              )}
-            </div>
-            <div className="mt-4 text-center">
-              <button onClick={() => setPopup(null)} className="text-gray-600 text-sm underline">
-                Annuleren
-              </button>
-            </div>
-          </div>
         </div>
       )}
     </div>
