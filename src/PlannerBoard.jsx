@@ -289,7 +289,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, pla
         </table>
       )}
 
-            {popup && (
+      {popup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-4 rounded shadow-md w-[400px]">
             <h2 className="font-bold mb-4 text-center">
@@ -303,7 +303,11 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, pla
                     className={`${kleurSchema[functie][soort].tailwind} px-3 py-2 rounded font-medium text-sm`}
                     onClick={() => updatePlanning(functie, soort)}
                   >
-                    {soort === "standby" ? `⏱️ ${functie}` : soort === "laat" ? `🌙 ${functie}` : functie}
+                    {soort === "standby"
+                      ? `⏱️ ${functie}`
+                      : soort === "laat"
+                      ? `🌙 ${functie}`
+                      : functie}
                   </button>
                 ))
               )}
@@ -315,7 +319,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp, pla
             </div>
           </div>
         </div>
-       )}
+      )}
     </div> {/* sluit de <div className="p-4 bg-gray-100"> */}
   );
 }
