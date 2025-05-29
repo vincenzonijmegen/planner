@@ -102,6 +102,8 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
 
     setMedewerkers(medewerkersMetKleur);
   }, [planning]);
+
+  
 }, [localBeschikbaarheid]);
 
 
