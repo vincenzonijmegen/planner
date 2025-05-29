@@ -96,10 +96,9 @@ export function handleBeschikbaarheidUpload(e, setBeschikbaarheid, setMedewerker
       });
 
       structuur[naam] = {
-  ...beschikbaarheidMedewerker,
-  leeftijd
-};
-
+        ...beschikbaarheidMedewerker,
+        leeftijd
+      };
     });
 
     console.log("✅ Beschikbaarheid ingelezen:", structuur);
@@ -148,6 +147,9 @@ export function importeerBeschikbaarheidKnop(setBeschikbaarheid, setMedewerkers)
     </label>
   );
 }
+
+
+
 export function handleFileUpload(e, setVakanties, setMedewerkers, beschikbaarheid) {
   const file = e.target.files[0];
   const reader = new FileReader();
