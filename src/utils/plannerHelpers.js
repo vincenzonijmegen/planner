@@ -39,7 +39,6 @@ export function importeerLoonkostenKnop(setLoonkosten) {
   );
 }
 
-
 export function handleBeschikbaarheidUpload(e, setBeschikbaarheid, setMedewerkers) {
   const file = e.target.files[0];
   const reader = new FileReader();
@@ -60,7 +59,7 @@ export function handleBeschikbaarheidUpload(e, setBeschikbaarheid, setMedewerker
         Vr: "vrijdag", Za: "zaterdag", Zo: "zondag"
       };
 
-const geboortedatumRaw = row["geboortedatum"];
+      const geboortedatumRaw = row["geboortedatum"];
       const geboortedatumStr = typeof geboortedatumRaw === "string" ? geboortedatumRaw.trim() : geboortedatumRaw;
 
       let leeftijd = 18;
@@ -93,33 +92,7 @@ const geboortedatumRaw = row["geboortedatum"];
             leeftijd--;
           }
         }
-      } = vandaag.getFullYear() - geboortedatum.getFullYear();
-  const m = vandaag.getMonth() - geboortedatum.getMonth();
-  if (m < 0 || (m === 0 && vandaag.getDate() < geboortedatum.getDate())) {
-    leeftijd--;
-  }
-} else if (geboortedatumStr instanceof Date && !isNaN(geboortedatumStr)) {
-  // Excel leverde echte Date
-  const geboortedatum = geboortedatumStr;
-  const vandaag = new Date();
-  leeftijd = vandaag.getFullYear() - geboortedatum.getFullYear();
-  const m = vandaag.getMonth() - geboortedatum.getMonth();
-  if (m < 0 || (m === 0 && vandaag.getDate() < geboortedatum.getDate())) {
-    leeftijd--;
-  }
-} else if (typeof geboortedatumStr === "string") {
-  const parts = geboortedatumStr.split("-");
-  if (parts.length === 3) {
-    const [dag, maand, jaar] = parts.map(Number);
-    const geboortedatum = new Date(jaar, maand - 1, dag);
-    const vandaag = new Date();
-    leeftijd = vandaag.getFullYear() - geboortedatum.getFullYear();
-    const m = vandaag.getMonth() - geboortedatum.getMonth();
-    if (m < 0 || (m === 0 && vandaag.getDate() < geboortedatum.getDate())) {
-      leeftijd--;
-    }
-  }
-}
+      }
 
       const beschikbaarheidMedewerker = {
         opmerking: row?.Opmerking || "",
@@ -140,10 +113,7 @@ const geboortedatumRaw = row["geboortedatum"];
         }
       });
 
-      structuur[naam] = {
-        ...beschikbaarheidMedewerker,
-        leeftijd
-      };
+      structuur[naam] = beschikbaarheidMedewerker;
     });
 
     console.log("✅ Beschikbaarheid ingelezen:", structuur);
