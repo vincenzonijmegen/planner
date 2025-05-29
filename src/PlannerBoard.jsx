@@ -63,29 +63,30 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
 
   useEffect(() => {
     console.log("📊 localBeschikbaarheid:", localBeschikbaarheid);
-  if (!localBeschikbaarheid || Object.keys(localBeschikbaarheid).length === 0) return;
+    if (!localBeschikbaarheid || Object.keys(localBeschikbaarheid).length === 0) return;
 
-  const gegenereerd = Object.entries(localBeschikbaarheid).map(([naamKey, data]) => {
-    return {
-      naam: naamKey,
-      leeftijd: data?.leeftijd ?? 18,
-      maxShifts: data?.maxShifts ?? 3,
-      opmerking: data?.opmerking || null
-    };
-  });
-
-  if (gegenereerd.length > 0) {
-    const medewerkersMetKleur = gegenereerd.map(m => {
-      const ingepland = shiftCountPerMedewerker[m.naam] || 0;
-      let statusKleur = "";
-      if (ingepland > m.maxShifts) statusKleur = "bg-red-200";
-      else if (ingepland < m.maxShifts) statusKleur = "bg-yellow-100";
-      else statusKleur = "bg-green-100";
-      return { ...m, statusKleur };
+    const gegenereerd = Object.entries(localBeschikbaarheid).map(([naamKey, data]) => {
+      return {
+        naam: naamKey,
+        leeftijd: data?.leeftijd ?? 18,
+        maxShifts: data?.maxShifts ?? 3,
+        opmerking: data?.opmerking || null
+      };
     });
-    setMedewerkers(medewerkersMetKleur);
-  }
-  setIsLoaded(true);
+
+    if (gegenereerd.length > 0) {
+      const medewerkersMetKleur = gegenereerd.map(m => {
+        const ingepland = shiftCountPerMedewerker[m.naam.toLowerCase()] || 0;
+        let statusKleur = "";
+        if (ingepland > m.maxShifts) statusKleur = "bg-red-200";
+        else if (ingepland < m.maxShifts) statusKleur = "bg-yellow-100";
+        else statusKleur = "bg-green-100";
+        return { ...m, statusKleur };
+      });
+      setMedewerkers(medewerkersMetKleur);
+    }
+    setIsLoaded(true);
+  }, [localBeschikbaarheid]);
 
   useEffect(() => {
     if (medewerkers.length === 0) return;
@@ -405,4 +406,3 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
       </table>
     </div>
   );
-}
