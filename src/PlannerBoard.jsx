@@ -62,6 +62,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
   }, []);
 
   useEffect(() => {
+    console.log("📊 localBeschikbaarheid:", localBeschikbaarheid);
   if (!localBeschikbaarheid || Object.keys(localBeschikbaarheid).length === 0) return;
 
   const gegenereerd = Object.entries(localBeschikbaarheid).map(([naamKey, data]) => {
