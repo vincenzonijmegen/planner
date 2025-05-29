@@ -61,7 +61,8 @@ export function handleBeschikbaarheidUpload(e, setBeschikbaarheid, setMedewerker
       };
     
       const beschikbaarheidMedewerker = {
-        opmerking: row?.Opmerking || ""
+        opmerking: row?.Opmerking || "",
+        maxShifts: parseInt(row?.MaxShifts) || 5
       };
     
       Object.keys(row).forEach((kolom) => {
@@ -79,16 +80,13 @@ export function handleBeschikbaarheidUpload(e, setBeschikbaarheid, setMedewerker
     
       structuur[naam] = beschikbaarheidMedewerker;
     });
-    
-    
 
-console.log("✅ Beschikbaarheid ingelezen:", structuur);
-if (typeof setBeschikbaarheid === "function") {
-  setBeschikbaarheid(structuur);
-} else {
-  console.error("❌ setBeschikbaarheid is not a function", setBeschikbaarheid);
-}
-
+    console.log("✅ Beschikbaarheid ingelezen:", structuur);
+    if (typeof setBeschikbaarheid === "function") {
+      setBeschikbaarheid(structuur);
+    } else {
+      console.error("❌ setBeschikbaarheid is not a function", setBeschikbaarheid);
+    }
 
     const medewerkersUniek = Array.from(new Set(data.map(r => r.Naam?.trim().toLowerCase()).filter(Boolean)))
       .map((naam) => {
@@ -116,10 +114,10 @@ if (typeof setBeschikbaarheid === "function") {
       });
 
     if (typeof setMedewerkers === "function") {
-  setMedewerkers(medewerkersUniek);
-} else {
-  console.error("❌ setMedewerkers is not a function", setMedewerkers);
-}
+      setMedewerkers(medewerkersUniek);
+    } else {
+      console.error("❌ setMedewerkers is not a function", setMedewerkers);
+    }
 
     console.log("✅ Medewerkers geladen:", medewerkersUniek);
     localStorage.setItem("medewerkers", JSON.stringify(medewerkersUniek));
@@ -147,7 +145,6 @@ export function importeerBeschikbaarheidKnop(setBeschikbaarheid, setMedewerkers)
     </label>
   );
 }
-
 
 
 export function handleFileUpload(e, setVakanties, setMedewerkers, beschikbaarheid) {
