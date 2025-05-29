@@ -59,40 +59,33 @@ export function handleBeschikbaarheidUpload(e, setBeschikbaarheid, setMedewerker
         Vr: "vrijdag", Za: "zaterdag", Zo: "zondag"
       };
 
-      const geboortedatumRaw = row["geboortedatum"];
-      const geboortedatumStr = typeof geboortedatumRaw === "string" ? geboortedatumRaw.trim() : geboortedatumRaw;
+const geboortedatumRaw = row["geboortedatum"];
+let leeftijd = 18;
 
-      let leeftijd = 18;
-
-      if (typeof geboortedatumRaw === "number") {
-        const geboortedatum = new Date((geboortedatumRaw - 25569) * 86400 * 1000);
-        const vandaag = new Date();
-        leeftijd = vandaag.getFullYear() - geboortedatum.getFullYear();
-        const m = vandaag.getMonth() - geboortedatum.getMonth();
-        if (m < 0 || (m === 0 && vandaag.getDate() < geboortedatum.getDate())) {
-          leeftijd--;
-        }
-      } else if (geboortedatumStr instanceof Date && !isNaN(geboortedatumStr)) {
-        const geboortedatum = geboortedatumStr;
-        const vandaag = new Date();
-        leeftijd = vandaag.getFullYear() - geboortedatum.getFullYear();
-        const m = vandaag.getMonth() - geboortedatum.getMonth();
-        if (m < 0 || (m === 0 && vandaag.getDate() < geboortedatum.getDate())) {
-          leeftijd--;
-        }
-      } else if (typeof geboortedatumStr === "string") {
-        const parts = geboortedatumStr.split("-");
-        if (parts.length === 3) {
-          const [dag, maand, jaar] = parts.map(Number);
-          const geboortedatum = new Date(jaar, maand - 1, dag);
-          const vandaag = new Date();
-          leeftijd = vandaag.getFullYear() - geboortedatum.getFullYear();
-          const m = vandaag.getMonth() - geboortedatum.getMonth();
-          if (m < 0 || (m === 0 && vandaag.getDate() < geboortedatum.getDate())) {
-            leeftijd--;
-          }
-        }
+if (typeof geboortedatumRaw === "number") {
+  const geboortedatum = new Date((geboortedatumRaw - 25569) * 86400 * 1000);
+  const vandaag = new Date();
+  leeftijd = vandaag.getFullYear() - geboortedatum.getFullYear();
+  const m = vandaag.getMonth() - geboortedatum.getMonth();
+  if (m < 0 || (m === 0 && vandaag.getDate() < geboortedatum.getDate())) {
+    leeftijd--;
+  }
+} else if (typeof geboortedatumRaw === "string" && geboortedatumRaw.includes("-")) {
+  const parts = geboortedatumRaw.split("-");
+  if (parts.length === 3) {
+    const [dag, maand, jaar] = parts.map(Number);
+    const geboortedatum = new Date(jaar, maand - 1, dag);
+    if (!isNaN(geboortedatum.getTime())) {
+      const vandaag = new Date();
+      leeftijd = vandaag.getFullYear() - geboortedatum.getFullYear();
+      const m = vandaag.getMonth() - geboortedatum.getMonth();
+      if (m < 0 || (m === 0 && vandaag.getDate() < geboortedatum.getDate())) {
+        leeftijd--;
       }
+    }
+  }
+}
+
 
       const beschikbaarheidMedewerker = {
         opmerking: row?.Opmerking || "",
