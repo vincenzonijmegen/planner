@@ -31,6 +31,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
   const [localBeschikbaarheid, setLocalBeschikbaarheid] = useState(beschikbaarheidProp);
   const [medewerkers, setMedewerkers] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const shiftCountPerMedewerker = getShiftCountPerMedewerker(planning);
 
   useEffect(() => {
     async function fetchGegevens() {
@@ -61,22 +62,30 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
   }, []);
 
   useEffect(() => {
-    if (!localBeschikbaarheid || Object.keys(localBeschikbaarheid).length === 0) return;
+    console.log("📊 localBeschikbaarheid:", localBeschikbaarheid);
+  if (!localBeschikbaarheid || Object.keys(localBeschikbaarheid).length === 0) return;
 
-    const gegenereerd = Object.entries(localBeschikbaarheid).map(([naamKey, data]) => {
-      return {
-        naam: naamKey,
-        leeftijd: data?.leeftijd ?? 18,
-        maxShifts: data?.maxShifts ?? 3,
-        opmerking: data?.opmerking || null
-      };
+  const gegenereerd = Object.entries(localBeschikbaarheid).map(([naamKey, data]) => {
+    return {
+      naam: naamKey,
+      leeftijd: data?.leeftijd ?? 18,
+      maxShifts: data?.maxShifts ?? 3,
+      opmerking: data?.opmerking || null
+    };
+  });
+
+  if (gegenereerd.length > 0) {
+    const medewerkersMetKleur = gegenereerd.map(m => {
+      const ingepland = shiftCountPerMedewerker[m.naam] || 0;
+      let statusKleur = "";
+      if (ingepland > m.maxShifts) statusKleur = "bg-red-200";
+      else if (ingepland < m.maxShifts) statusKleur = "bg-yellow-100";
+      else statusKleur = "bg-green-100";
+      return { ...m, statusKleur };
     });
-
-    if (gegenereerd.length > 0) {
-      setMedewerkers(gegenereerd);
-    }
-    setIsLoaded(true);
-  }, [localBeschikbaarheid]);
+    setMedewerkers(medewerkersMetKleur);
+  }
+  setIsLoaded(true);
 
   useEffect(() => {
     if (medewerkers.length === 0) return;
@@ -95,7 +104,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
   }, [planning]);
 
   
-}, [localBeschikbaarheid];
+}, [localBeschikbaarheid]);
 
 
   async function opslaanNaarSupabase() {
@@ -396,3 +405,4 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
       </table>
     </div>
   );
+}
