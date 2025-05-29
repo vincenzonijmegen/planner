@@ -47,24 +47,41 @@ export function handleBeschikbaarheidUpload(e, setBeschikbaarheid, setMedewerker
   reader.onload = (evt) => {
     const wb = XLSX.read(evt.target.result, { type: "array" });
     const ws = wb.Sheets[wb.SheetNames[0]];
-    const data = XLSX.utils.sheet_to_json(ws, { raw: true });
+    const data = XLSX.utils.sheet_to_json(ws, { raw: false });
 
     const structuur = {};
 
     data.forEach((row) => {
       const naam = (row["Naam"] || "").trim().toLowerCase();
       if (!naam) return;
-    
+
       const dagen = {
         Ma: "maandag", Di: "dinsdag", Wo: "woensdag", Do: "donderdag",
         Vr: "vrijdag", Za: "zaterdag", Zo: "zondag"
       };
-    
+
+      const geboortedatumStr = row["geboortedatum"];
+      let leeftijd = 18;
+      if (geboortedatumStr) {
+        const parts = geboortedatumStr.split("-");
+        if (parts.length === 3) {
+          const [dag, maand, jaar] = parts.map(Number);
+          const geboortedatum = new Date(jaar, maand - 1, dag);
+          const vandaag = new Date();
+          leeftijd = vandaag.getFullYear() - geboortedatum.getFullYear();
+          const m = vandaag.getMonth() - geboortedatum.getMonth();
+          if (m < 0 || (m === 0 && vandaag.getDate() < geboortedatum.getDate())) {
+            leeftijd--;
+          }
+        }
+      }
+
       const beschikbaarheidMedewerker = {
         opmerking: row?.Opmerking || "",
-        maxShifts: parseInt(row?.MaxShifts) || 5
+        maxShifts: parseInt(row?.MaxShifts) || 5,
+        leeftijd
       };
-    
+
       Object.keys(row).forEach((kolom) => {
         const match = kolom.match(/^(Ma|Di|Wo|Do|Vr|Za|Zo)\s?([12])$/);
         if (match) {
@@ -72,12 +89,12 @@ export function handleBeschikbaarheidUpload(e, setBeschikbaarheid, setMedewerker
           const dag = dagen[dagCode];
           const shift = parseInt(shiftStr);
           const waarde = (row[kolom] || "").toString().toLowerCase();
-    
+
           if (!beschikbaarheidMedewerker[dag]) beschikbaarheidMedewerker[dag] = {};
           beschikbaarheidMedewerker[dag][shift] = waarde === "beschikbaar" || waarde === "ja";
         }
       });
-    
+
       structuur[naam] = beschikbaarheidMedewerker;
     });
 
@@ -88,25 +105,11 @@ export function handleBeschikbaarheidUpload(e, setBeschikbaarheid, setMedewerker
       console.error("❌ setBeschikbaarheid is not a function", setBeschikbaarheid);
     }
 
-    // let PlannerBoard de maxShifts opnieuw uitlezen uit de bijgewerkte structuur
     if (typeof setMedewerkers === "function") {
       const medewerkers = Object.entries(structuur).map(([naam, data]) => {
-        const geboorteDatumRuw = data?.geboortedatum;
-        let geboortedatum = typeof geboorteDatumRuw === "number"
-          ? new Date((geboorteDatumRuw - 25569) * 86400 * 1000)
-          : new Date(geboorteDatumRuw);
-        if (isNaN(geboortedatum.getTime())) {
-          geboortedatum = new Date("2000-01-01");
-        }
-
-        const vandaag = new Date();
-        const leeftijd = vandaag.getFullYear() - geboortedatum.getFullYear() - (
-          vandaag < new Date(vandaag.getFullYear(), geboortedatum.getMonth(), geboortedatum.getDate()) ? 1 : 0
-        );
-
         return {
           naam: naam.charAt(0).toUpperCase() + naam.slice(1),
-          leeftijd: leeftijd,
+          leeftijd: data?.leeftijd ?? 18,
           maxShifts: data?.maxShifts ?? 3,
           opmerking: data?.opmerking || ""
         };
@@ -141,7 +144,6 @@ export function importeerBeschikbaarheidKnop(setBeschikbaarheid, setMedewerkers)
     </label>
   );
 }
-
 export function handleFileUpload(e, setVakanties, setMedewerkers, beschikbaarheid) {
   const file = e.target.files[0];
   const reader = new FileReader();
