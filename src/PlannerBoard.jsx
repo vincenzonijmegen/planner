@@ -62,22 +62,23 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
   }, []);
 
   useEffect(() => {
-    if (!localBeschikbaarheid || Object.keys(localBeschikbaarheid).length === 0) return;
+  if (!localBeschikbaarheid || Object.keys(localBeschikbaarheid).length === 0) return;
 
-    const gegenereerd = Object.entries(localBeschikbaarheid).map(([naamKey]) => {
-      const origineleNaam = naamKey;
-      return {
-        naam: origineleNaam,
-        leeftijd: 18,
-        maxShifts: 3
-      };
-    });
+  const gegenereerd = Object.entries(localBeschikbaarheid).map(([naamKey, data]) => {
+    return {
+      naam: naamKey,
+      leeftijd: data?.leeftijd ?? 18,
+      maxShifts: data?.maxShifts ?? 3,
+      opmerking: data?.opmerking || null
+    };
+  });
 
-    if (gegenereerd.length > 0) {
-      setMedewerkers(gegenereerd);
-    }
-    setIsLoaded(true);
-  }, [localBeschikbaarheid]);
+  if (gegenereerd.length > 0) {
+    setMedewerkers(gegenereerd);
+  }
+  setIsLoaded(true);
+}, [localBeschikbaarheid]);
+
 
   async function opslaanNaarSupabase() {
     const bestanden = [
