@@ -308,10 +308,12 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
             const naamKey = m.naam.trim().toLowerCase();
             return (
               <tr key={m.naam}>
-<td className={`border px-4 py-2 text-left whitespace-nowrap w-60 font-bold ${m.statusKleur}`}>
-  {m.naam.replace(/\b\w/g, c => c.toUpperCase())} [{m.leeftijd ?? "?"}] ({shiftCountPerMedewerker[m.naam] || 0}/{m.maxShifts ?? "?"})
-  {m.opmerking && <span title={m.opmerking} className="ml-1 text-red-600">📌</span>}
-</td>
+  
+          <td className={`border px-4 py-2 text-left whitespace-nowrap w-60 font-bold ${m.statusKleur}`}>
+          {m.naam.replace(/\b\w/g, c => c.toUpperCase())} [{m.leeftijd ?? "?"}] ({shiftCountPerMedewerker[m.naam] || 0}/{m.maxShifts ?? "?"})
+          {m.opmerking && <span title={m.opmerking} className="ml-1 text-red-600">📌</span>}
+          </td>
+
 
 
                 {dagen.map((dag) =>
