@@ -31,7 +31,6 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
   const [localBeschikbaarheid, setLocalBeschikbaarheid] = useState(beschikbaarheidProp);
   const [medewerkers, setMedewerkers] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
-  const shiftCountPerMedewerker = getShiftCountPerMedewerker(planning);
 
   useEffect(() => {
     async function fetchGegevens() {
@@ -62,7 +61,6 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
   }, []);
 
   useEffect(() => {
-    console.log("📊 localBeschikbaarheid:", localBeschikbaarheid);
     if (!localBeschikbaarheid || Object.keys(localBeschikbaarheid).length === 0) return;
 
     const gegenereerd = Object.entries(localBeschikbaarheid).map(([naamKey, data]) => {
@@ -75,15 +73,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
     });
 
     if (gegenereerd.length > 0) {
-      const medewerkersMetKleur = gegenereerd.map(m => {
-        const ingepland = shiftCountPerMedewerker[m.naam.toLowerCase()] || 0;
-        let statusKleur = "";
-        if (ingepland > m.maxShifts) statusKleur = "bg-red-200";
-        else if (ingepland < m.maxShifts) statusKleur = "bg-yellow-100";
-        else statusKleur = "bg-green-100";
-        return { ...m, statusKleur };
-      });
-      setMedewerkers(medewerkersMetKleur);
+      setMedewerkers(gegenereerd);
     }
     setIsLoaded(true);
   }, [localBeschikbaarheid]);
@@ -105,7 +95,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
   }, [planning]);
 
   
-}, [localBeschikbaarheid]);
+}, [localBeschikbaarheid];
 
 
   async function opslaanNaarSupabase() {
