@@ -76,8 +76,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
 
   if (gegenereerd.length > 0) {
     const medewerkersMetKleur = gegenereerd.map(m => {
-    const ingepland = shiftCountPerMedewerker[m.naam.toLowerCase()] || 0;
-
+      const ingepland = shiftCountPerMedewerker[m.naam] || 0;
       let statusKleur = "";
       if (ingepland > m.maxShifts) statusKleur = "bg-red-200";
       else if (ingepland < m.maxShifts) statusKleur = "bg-yellow-100";
@@ -87,6 +86,22 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
     setMedewerkers(medewerkersMetKleur);
   }
   setIsLoaded(true);
+
+  useEffect(() => {
+    if (medewerkers.length === 0) return;
+    const nieuweTelling = getShiftCountPerMedewerker(planning);
+
+    const medewerkersMetKleur = medewerkers.map((m) => {
+      const ingepland = nieuweTelling[m.naam.toLowerCase()] || 0;
+      let statusKleur = "";
+      if (ingepland > m.maxShifts) statusKleur = "bg-red-200";
+      else if (ingepland < m.maxShifts) statusKleur = "bg-yellow-100";
+      else statusKleur = "bg-green-100";
+      return { ...m, statusKleur };
+    });
+
+    setMedewerkers(medewerkersMetKleur);
+  }, [planning]);
 }, [localBeschikbaarheid]);
 
 
