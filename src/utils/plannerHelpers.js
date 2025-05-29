@@ -60,7 +60,8 @@ export function handleBeschikbaarheidUpload(e, setBeschikbaarheid, setMedewerker
       };
 
       const geboortedatumRaw = row["geboortedatum"];
-      const leeftijd = parseInt(row?.Leeftijd) || 18;
+      const leeftijdKolom = Object.keys(row).find(k => k.toLowerCase() === "leeftijd");
+      const leeftijd = parseInt(row[leeftijdKolom]) || 18;
 const beschikbaarheidMedewerker = {
         opmerking: row?.Opmerking || "",
         maxShifts: parseInt(row?.MaxShifts) || 5,
