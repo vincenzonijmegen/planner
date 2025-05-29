@@ -95,7 +95,11 @@ export function handleBeschikbaarheidUpload(e, setBeschikbaarheid, setMedewerker
         }
       });
 
-      structuur[naam] = beschikbaarheidMedewerker;
+      structuur[naam] = {
+  ...beschikbaarheidMedewerker,
+  leeftijd
+};
+
     });
 
     console.log("✅ Beschikbaarheid ingelezen:", structuur);
