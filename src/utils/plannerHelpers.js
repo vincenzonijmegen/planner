@@ -60,9 +60,19 @@ export function handleBeschikbaarheidUpload(e, setBeschikbaarheid, setMedewerker
         Vr: "vrijdag", Za: "zaterdag", Zo: "zondag"
       };
 
-      const geboortedatumStr = row["geboortedatum"];
+const geboortedatumRaw = row["geboortedatum"];
+      const geboortedatumStr = typeof geboortedatumRaw === "string" ? geboortedatumRaw.trim() : geboortedatumRaw;
+
       let leeftijd = 18;
-      if (geboortedatumStr) {
+      if (geboortedatumStr instanceof Date && !isNaN(geboortedatumStr)) {
+        const geboortedatum = geboortedatumStr;
+        const vandaag = new Date();
+        leeftijd = vandaag.getFullYear() - geboortedatum.getFullYear();
+        const m = vandaag.getMonth() - geboortedatum.getMonth();
+        if (m < 0 || (m === 0 && vandaag.getDate() < geboortedatum.getDate())) {
+          leeftijd--;
+        }
+      } else if (typeof geboortedatumStr === "string") {
         const parts = geboortedatumStr.split("-");
         if (parts.length === 3) {
           const [dag, maand, jaar] = parts.map(Number);
