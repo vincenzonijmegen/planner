@@ -100,7 +100,15 @@ const beschikbaarheidMedewerker = {
           opmerking: data?.opmerking || ""
         };
       });
-      setMedewerkers(medewerkers);
+      const shiftCounts = getShiftCountPerMedewerker(JSON.parse(localStorage.getItem("planning") || "{}"));
+      const medewerkersMetStatus = medewerkers.map(m => {
+        const ingepland = shiftCounts[m.naam.toLowerCase()] || 0;
+        return {
+          ...m,
+          statusKleur: ingepland > m.maxShifts ? "bg-red-200" : ingepland < m.maxShifts ? "bg-yellow-100" : "bg-white"
+        };
+      });
+      setMedewerkers(medewerkersMetStatus);
     } else {
       console.error("❌ setMedewerkers is not a function", setMedewerkers);
     }
