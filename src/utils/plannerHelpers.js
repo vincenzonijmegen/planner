@@ -88,11 +88,10 @@ export function handleBeschikbaarheidUpload(e, setBeschikbaarheid, setMedewerker
       console.error("❌ setBeschikbaarheid is not a function", setBeschikbaarheid);
     }
 
-    const medewerkersUniek = Array.from(new Set(data.map(r => r.Naam?.trim().toLowerCase()).filter(Boolean)))
-      .map((naam) => {
-        const row = data.find(r => (r.Naam || "").trim().toLowerCase() === naam);
-
-        const geboorteDatumRuw = row?.geboortedatum;
+    // let PlannerBoard de maxShifts opnieuw uitlezen uit de bijgewerkte structuur
+    if (typeof setMedewerkers === "function") {
+      const medewerkers = Object.entries(structuur).map(([naam, data]) => {
+        const geboorteDatumRuw = data?.geboortedatum;
         let geboortedatum = typeof geboorteDatumRuw === "number"
           ? new Date((geboorteDatumRuw - 25569) * 86400 * 1000)
           : new Date(geboorteDatumRuw);
@@ -108,19 +107,16 @@ export function handleBeschikbaarheidUpload(e, setBeschikbaarheid, setMedewerker
         return {
           naam: naam.charAt(0).toUpperCase() + naam.slice(1),
           leeftijd: leeftijd,
-          maxShifts: parseInt(row?.MaxShifts) || 5,
-          opmerking: row?.Opmerking || ""
+          maxShifts: data?.maxShifts ?? 3,
+          opmerking: data?.opmerking || ""
         };
       });
-
-    if (typeof setMedewerkers === "function") {
-      setMedewerkers(medewerkersUniek);
+      setMedewerkers(medewerkers);
     } else {
       console.error("❌ setMedewerkers is not a function", setMedewerkers);
     }
 
-    console.log("✅ Medewerkers geladen:", medewerkersUniek);
-    localStorage.setItem("medewerkers", JSON.stringify(medewerkersUniek));
+    localStorage.setItem("beschikbaarheid", JSON.stringify(structuur));
   };
 
   reader.readAsArrayBuffer(file);
@@ -145,7 +141,6 @@ export function importeerBeschikbaarheidKnop(setBeschikbaarheid, setMedewerkers)
     </label>
   );
 }
-
 
 export function handleFileUpload(e, setVakanties, setMedewerkers, beschikbaarheid) {
   const file = e.target.files[0];
