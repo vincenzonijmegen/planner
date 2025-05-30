@@ -263,14 +263,8 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
       return nieuw;
     });
   } else {
-    setPlanning((prev) => {
-      const nieuw = { ...prev };
-      if (!nieuw[naamKey]) nieuw[naamKey] = {};
-      if (!nieuw[naamKey][dag]) nieuw[naamKey][dag] = {};
-      nieuw[naamKey][dag][shift] = { functie: "schepper", soort: "vast" };
-      localStorage.setItem("planning", JSON.stringify(nieuw));
-      return nieuw;
-    });
+    setPopup({ medewerker: m.naam, dag, shift });
+  }
   }
 }}
 
