@@ -178,19 +178,17 @@ if (!isLoaded && medewerkers.length === 0) {
             )}
           </tr>
         </thead>
-        <thead>
+        <tbody>
           <tr>
-            <th className="border px-4 py-2 text-left w-60">Naam</th>
+            <th className="border px-2 py-1 bg-white sticky top-0 z-10">&nbsp;</th>
             {dagen.map((dag) =>
               shifts.map((shift) => (
-                <th key={`bovenNaam-${dag}-${shift}`} className="border px-2 py-1 text-center">
+                <th key={`kopie-${dag}-${shift}`} className="border px-2 py-1 text-center bg-white sticky top-0 z-10">
                   {dag} {shift}
                 </th>
               ))
             )}
           </tr>
-        </thead>
-        <tbody>
           <tr>
             <td className="border px-2 py-1 font-semibold bg-gray-100">Totaal ingepland</td>
             {dagen.map((dag) =>
