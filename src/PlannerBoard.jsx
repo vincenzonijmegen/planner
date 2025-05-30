@@ -166,18 +166,6 @@ if (!isLoaded && medewerkers.length === 0) {
       )}
 
       <table className="table-fixed border w-full bg-white text-xs font-sans">
-        <thead>
-          <tr>
-            <th className="border px-4 py-2 text-left w-60">Naam</th>
-            {dagen.map((dag) =>
-              shifts.map((shift) => (
-                <th key={`${dag}-${shift}`} className="border px-2 py-1 text-center">
-                  {dag} {shift}
-                </th>
-              ))
-            )}
-          </tr>
-        </thead>
         <tbody>
           <tr>
             <th className="border px-2 py-1 bg-white sticky top-0 z-10">&nbsp;</th>
