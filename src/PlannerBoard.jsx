@@ -23,6 +23,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
   const [popup, setPopup] = useState(null);
   const [localBeschikbaarheid, setLocalBeschikbaarheid] = useState(beschikbaarheidProp);
   const [medewerkers, setMedewerkers] = useState([]);
+  const [teamFilter, setTeamFilter] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const shiftCountPerMedewerker = getShiftCountPerMedewerker(planning);
 
@@ -56,7 +57,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
       opmerking: data?.opmerking || null
     }));
 
-    const medewerkersMetKleur = gegenereerd.map(m => {
+    const medewerkersMetKleur = gegenereerd.filter(m => !teamFilter || m.teamkleur === teamFilter).map(m => {
       const ingepland = shiftCountPerMedewerker[m.naam.toLowerCase()] || 0;
       let statusKleur = "";
       if (ingepland > m.maxShifts) statusKleur = "bg-red-200";
