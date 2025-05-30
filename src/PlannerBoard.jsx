@@ -142,7 +142,8 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
     shifts.map((shift) => {
       const totaal = medewerkers.reduce((som, m) => {
         const naamKey = m.naam.trim().toLowerCase();
-        const entry = planning[naamKey]?.[dag]?.[shift];
+        const naamKeyInner = m.naam.trim().toLowerCase();
+                    const entry = planning[naamKeyInner]?.[dag]?.[shift];
         if (!entry) return som;
         const uren = (entry.soort === "standby" || entry.soort === "laat") ? 4 : 6;
         const leeftijd = typeof m.leeftijd === "number" ? m.leeftijd : 18;
@@ -181,7 +182,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
                 {dagen.map((dag) =>
                   shifts.map((shift) => {
                     const entry = planning[naamKey]?.[dag]?.[shift];
-                    const beschikbaar = localBeschikbaarheid?.[naamKey]?.[dagMap[dag]]?.[shift];
+                    const beschikbaar = localBeschikbaarheid?.[naamKeyInner]?.[dagMap[dag]]?.[shift];
                     let text = "";
                     let bgColor = "#ffffff";
                     let color = "#000000";
@@ -218,9 +219,9 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
                           if (entry) {
                             setPlanning((prev) => {
                               const nieuw = { ...prev };
-                              delete nieuw[naamKey][dag][shift];
-                              if (Object.keys(nieuw[naamKey][dag]).length === 0) delete nieuw[naamKey][dag];
-                              if (Object.keys(nieuw[naamKey]).length === 0) delete nieuw[naamKey];
+                              delete nieuw[naamKeyInner][dag][shift];
+                              if (Object.keys(nieuw[naamKeyInner][dag]).length === 0) delete nieuw[naamKeyInner][dag];
+                              if (Object.keys(nieuw[naamKeyInner]).length === 0) delete nieuw[naamKeyInner];
                               localStorage.setItem("planning", JSON.stringify(nieuw));
                               return nieuw;
                             });
