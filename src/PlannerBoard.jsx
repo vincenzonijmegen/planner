@@ -25,6 +25,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
   const [medewerkers, setMedewerkers] = useState([]);
   const [teamFilter, setTeamFilter] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [totaleLoonkosten, setTotaleLoonkosten] = useState(0);
   const shiftCountPerMedewerker = getShiftCountPerMedewerker(planning);
 
   useEffect(() => {
@@ -69,6 +70,27 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
     setIsLoaded(true);
   }, [localBeschikbaarheid]);
 
+  useEffect(() => {
+    const totaal = medewerkers.reduce((som, m) => {
+      const leeftijd = m.leeftijd ?? 18;
+      const uurloon = loonkostenPerUur[leeftijd] ?? 15;
+
+      const perPersoon = dagen.reduce((dagSom, dag) => {
+        return dagSom + shifts.reduce((shiftSom, shift) => {
+          const entry = planning[m.naam]?.[dag]?.[shift];
+          if (!entry) return shiftSom;
+          let uren = entry.soort === "standby" || entry.soort === "laat" ? 4 : 6;
+          return shiftSom + uren * uurloon;
+        }, 0);
+      }, 0);
+
+      return som + perPersoon;
+    }, 0);
+
+    setTotaleLoonkosten(totaal);
+  }, [medewerkers, planning, loonkostenPerUur]);
+  }, [localBeschikbaarheid]);
+
   async function opslaanNaarR2() {
     const bestanden = [
       { naam: "planning.json", inhoud: planning },
@@ -91,6 +113,9 @@ if (!isLoaded && medewerkers.length === 0) {
   return (
     <div className="p-4">
       <div className="text-gray-500 mb-4">⏳ Bezig met laden... of nog geen gegevens gevonden.</div>
+      <div className="text-right font-semibold mb-2">
+        Totale loonkosten: €{Math.round(totaleLoonkosten)}
+      </div>
       <div className="flex flex-wrap gap-2 items-center mb-4">
         {importeerBeschikbaarheidKnop(setLocalBeschikbaarheid, setMedewerkers)}
         {React.cloneElement(importeerLoonkostenKnop(setLoonkostenPerUur), {
