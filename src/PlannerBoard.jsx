@@ -29,7 +29,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
       const bestanden = ["planning.json", "beschikbaarheid.json", "loonkosten.json"];
       for (const bestand of bestanden) {
         try {
-          const url = `https://vincenzo-uploads.48b3ca960ac98a5b99df6b74d8cf4b3e.r2.dev/${bestand}?t=${Date.now()}`;
+          const url = `https://48b3ca960ac98a5b99df6b74d8cf4b3e.r2.cloudflarestorage.com/public/vincenzo-uploads/${bestand}?t=${Date.now()}`
           const res = await fetch(url, { cache: "no-store" });
           if (!res.ok) throw new Error(`Fout bij ophalen van ${bestand}: ${res.statusText}`);
           const json = await res.json();
