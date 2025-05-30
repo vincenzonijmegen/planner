@@ -1,9 +1,7 @@
 // src/utils/r2ClientUpload.js
 
 export async function uploadJSONBestandS3(naam, inhoud) {
-  console.log("📤 Upload naar R2:", naam, inhoud); // ✅ zie wat je verstuurt
-
-  const response = await fetch(`https://planner-upload.herman-48b.workers.dev/upload/${naam}`, {
+  const response = await fetch(`https://planner-upload-v2.herman-48b.workers.dev/upload/${naam}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json"
@@ -21,9 +19,9 @@ export async function uploadJSONBestandS3(naam, inhoud) {
 
 
 
+
 export async function fetchJSONBestandS3(naam) {
-  const url = `https://planner-upload.herman-48b.workers.dev/upload/${naam}?t=${Date.now()}`;
-  const res = await fetch(url, { cache: "no-store" });
+  const res = await fetch(`https://planner-upload-v2.herman-48b.workers.dev/upload/${naam}`);
   if (!res.ok) throw new Error(`Fout bij ophalen van ${naam}: ${res.statusText}`);
   return res.json();
 }
