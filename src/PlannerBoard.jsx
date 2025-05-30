@@ -270,42 +270,60 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
         </tfoot>
       </table>
     {popup && (
-      <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-        <div className="bg-white p-4 rounded-lg shadow-xl w-72">
-          <h2 className="text-lg font-semibold mb-2">Kies functie & soort</h2>
-          <div className="space-y-2">
-            {["schepper", "ijsbereider", "ijsvoorbereider"].map((functie) => (
-              <div key={functie} className="flex gap-2">
-                {["vast", "standby", "laat"].map((soort) => (
-                  <button
-                    key={soort}
-                    onClick={() => {
-                      const { medewerker, dag, shift } = popup;
-                      const naamKey = medewerker.trim().toLowerCase();
-                      setPlanning((prev) => {
-                        const nieuw = { ...prev };
-                        if (!nieuw[naamKey]) nieuw[naamKey] = {};
-                        if (!nieuw[naamKey][dag]) nieuw[naamKey][dag] = {};
-                        nieuw[naamKey][dag][shift] = { functie, soort };
-                        localStorage.setItem("planning", JSON.stringify(nieuw));
-                        return nieuw;
-                      });
-                      setPopup(null);
-                    }}
-                    className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-                  >
-                    {functie} ({soort})
-                  </button>
-                ))}
-              </div>
-            ))}
-          </div>
-          <button onClick={() => setPopup(null)} className="mt-4 text-sm text-gray-500 hover:underline">
-            Annuleren
-          </button>
-        </div>
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white p-4 rounded shadow-md w-[400px]">
+      <h2 className="font-bold mb-4 text-center">
+        {popup.medewerker} - {popup.dag} Shift {popup.shift}
+      </h2>
+      <div className="grid grid-cols-3 gap-2">
+        {["ijsbereider", "ijsvoorbereider", "schepper"].flatMap((functie) =>
+          ["vast", "standby", "laat"].map((soort) => {
+            let kleur = "";
+            let label = "";
+
+            if (functie === "ijsbereider") {
+              kleur = soort === "vast" ? "bg-blue-900 text-white" : soort === "standby" ? "bg-blue-600 text-white" : "bg-blue-300 text-black";
+              label = soort === "vast" ? "bereider" : soort === "standby" ? "⏱️ bereider" : "🌙 bereider";
+            }
+
+            if (functie === "ijsvoorbereider") {
+              kleur = soort === "vast" ? "bg-green-900 text-white" : soort === "standby" ? "bg-green-600 text-white" : "bg-green-300 text-black";
+              label = soort === "vast" ? "prep" : soort === "standby" ? "⏱️ prep" : "🌙 prep";
+            }
+
+            if (functie === "schepper") {
+              kleur = soort === "vast" ? "bg-slate-700 text-white" : soort === "standby" ? "bg-slate-500 text-white" : "bg-slate-300 text-black";
+              label = soort === "vast" ? "schep" : soort === "standby" ? "⏱️ schep" : "🌙 schep";
+            }
+
+            return (
+              <button
+                key={`${functie}-${soort}`}
+                className={`${kleur} px-3 py-2 rounded font-medium text-sm`}
+                onClick={() => {
+                  const { medewerker, dag, shift } = popup;
+                  setPlanning((prev) => {
+                    const nieuw = { ...prev };
+                    if (!nieuw[medewerker]) nieuw[medewerker] = {};
+                    if (!nieuw[medewerker][dag]) nieuw[medewerker][dag] = {};
+                    nieuw[medewerker][dag][shift] = { functie, soort };
+                    localStorage.setItem("planning", JSON.stringify(nieuw));
+                    return nieuw;
+                  });
+                  setPopup(null);
+                }}
+              >
+                {label}
+              </button>
+            );
+          })
+        )}
       </div>
-    )}
+      <div className="mt-4 text-center">
+        <button onClick={() => setPopup(null)} className="text-gray-600 text-sm underline">
+          Annuleren
+        </button>
+      </div>
+    </div>
   </div>
-  );
-}
+)}
