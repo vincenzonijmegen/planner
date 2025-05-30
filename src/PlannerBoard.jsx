@@ -276,7 +276,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
         {popup.medewerker} - {popup.dag} Shift {popup.shift}
       </h2>
       <div className="grid grid-cols-3 gap-2">
-        {["ijsbereider", "ijsvoorbereider", "schepper"].flatMap((functie) =>
+        {["schepper", "ijsbereider", "ijsvoorbereider"].flatMap((functie) =>
           ["vast", "standby", "laat"].map((soort) => {
             let kleur = "";
             let label = "";
