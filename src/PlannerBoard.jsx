@@ -10,7 +10,7 @@ import {
 import { dagMap } from "./utils/dagen";
 import { exportToPDF } from "./utils/exportToPDF";
 import { kleurSchema } from "./utils/kleurSchema";
-import { fetchJSONBestand, uploadJSONBestand } from "./utils/r2Client";
+import { fetchJSONBestandS3, uploadJSONBestand } from "./utils/r2ClientUpload";
 import { uploadJSONBestandS3 } from "./utils/r2ClientUpload";
 
 const dagen = ["ma", "di", "wo", "do", "vr", "za", "zo"];
@@ -30,7 +30,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
       const bestanden = ["planning.json", "beschikbaarheid.json", "loonkosten.json"];
       for (const bestand of bestanden) {
         try {
-          const json = await fetchJSONBestand(bestand);
+          const json = await fetchJSONBestandS3(bestand);
           if (bestand === "planning.json") {
             setPlanning(json);
             localStorage.setItem("planning", JSON.stringify(json));
