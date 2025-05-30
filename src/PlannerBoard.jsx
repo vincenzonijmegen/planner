@@ -11,7 +11,6 @@ import { dagMap } from "./utils/dagen";
 import { exportToPDF } from "./utils/exportToPDF";
 import { kleurSchema } from "./utils/kleurSchema";
 import { uploadJSONBestandS3 } from "./utils/r2ClientUpload";
-import { uploadJSONBestandS3 } from "./utils/r2ClientUpload";
 
 const dagen = ["ma", "di", "wo", "do", "vr", "za", "zo"];
 const shifts = [1, 2];
