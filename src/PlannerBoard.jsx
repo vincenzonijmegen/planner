@@ -84,7 +84,23 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
     alert("✅ Alles succesvol opgeslagen naar R2!");
   }
 
-  if (!isLoaded) return <div className="p-4 text-gray-500">⏳ Bezig met laden...</div>;
+if (!isLoaded && medewerkers.length === 0) {
+  return (
+    <div className="p-4">
+      <div className="text-gray-500 mb-4">⏳ Bezig met laden... of nog geen gegevens gevonden.</div>
+      <div className="flex flex-wrap gap-2 items-center mb-4">
+        {importeerBeschikbaarheidKnop(setLocalBeschikbaarheid, setMedewerkers)}
+        {React.cloneElement(importeerLoonkostenKnop(setLoonkostenPerUur), {
+          className: "bg-blue-600 text-white px-4 py-2 rounded shadow"
+        })}
+        <button onClick={opslaanNaarR2} className="bg-indigo-600 text-white px-4 py-2 rounded shadow">
+          💾 Opslaan naar Cloudflare R2
+        </button>
+      </div>
+    </div>
+  );
+}
+
 
   return (
     <div className="p-4 bg-gray-100">
@@ -207,7 +223,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
             </tr>
           ))}
 
-          
+
         
           {medewerkers.map((m) => {
             const naamKey = m.naam.trim().toLowerCase();
