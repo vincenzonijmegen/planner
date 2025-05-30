@@ -23,8 +23,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
   const [localBeschikbaarheid, setLocalBeschikbaarheid] = useState(beschikbaarheidProp);
   const [medewerkers, setMedewerkers] = useState([]);
     const [isLoaded, setIsLoaded] = useState(false);
-  const [totaleLoonkosten, setTotaleLoonkosten] = useState(0);
-  const shiftCountPerMedewerker = getShiftCountPerMedewerker(planning);
+    const shiftCountPerMedewerker = getShiftCountPerMedewerker(planning);
 
   useEffect(() => {
     async function fetchGegevens() {
@@ -70,26 +69,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
     setIsLoaded(true);
   }, [localBeschikbaarheid]);
 
-  useEffect(() => {
-    let totaal = 0;
-
-    for (const dag of dagen) {
-      for (const shift of shifts) {
-        const loonkosten = medewerkers.reduce((som, m) => {
-          const entry = planning[m.naam]?.[dag]?.[shift];
-          if (!entry) return som;
-          const uren = entry.soort === "standby" || entry.soort === "laat" ? 4 : 6;
-          const leeftijd = typeof m.leeftijd === "number" ? m.leeftijd : 18;
-          const uurloon = loonkostenPerUur[leeftijd] ?? 15;
-          return som + uren * uurloon;
-        }, 0);
-        totaal += loonkosten;
-      }
-    }
-
-    setTotaleLoonkosten(totaal);
-  }, [planning, loonkostenPerUur, medewerkers]);
-
+  
   async function opslaanNaarR2() {
     const bestanden = [
       { naam: "planning.json", inhoud: planning },
@@ -112,10 +92,7 @@ if (!isLoaded && medewerkers.length === 0) {
   return (
     <div className="p-4">
       <div className="text-gray-500 mb-4">⏳ Bezig met laden... of nog geen gegevens gevonden.</div>
-      <div className="text-right font-semibold mb-2">
-        Totale loonkosten: €{Math.round(totaleLoonkosten)}
-      </div>
-      <div className="flex flex-wrap gap-2 items-center mb-4">
+            <div className="flex flex-wrap gap-2 items-center mb-4">
         {importeerBeschikbaarheidKnop(setLocalBeschikbaarheid, setMedewerkers)}
         {React.cloneElement(importeerLoonkostenKnop(setLoonkostenPerUur), {
           className: "bg-blue-600 text-white px-4 py-2 rounded shadow"
