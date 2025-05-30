@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import * as XLSX from "xlsx";
 
-
 import {
   getShiftCountPerMedewerker,
   importeerBeschikbaarheidKnop,
@@ -58,14 +57,16 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
       opmerking: data?.opmerking || null
     }));
 
-    const medewerkersMetKleur = gegenereerd.filter(m => !teamFilter || m.teamkleur === teamFilter).map(m => {
-      const ingepland = shiftCountPerMedewerker[m.naam.toLowerCase()] || 0;
-      let statusKleur = "";
-      if (ingepland > m.maxShifts) statusKleur = "bg-red-200";
-      else if (ingepland < m.maxShifts) statusKleur = "bg-yellow-100";
-      else statusKleur = "bg-green-100";
-      return { ...m, statusKleur };
-    });
+    const medewerkersMetKleur = tegenereerd
+      .filter(m => !teamFilter || m.teamkleur === teamFilter)
+      .map(m => {
+        const ingepland = shiftCountPerMedewerker[m.naam.toLowerCase()] || 0;
+        let statusKleur = "";
+        if (ingepland > m.maxShifts) statusKleur = "bg-red-200";
+        else if (ingepland < m.maxShifts) statusKleur = "bg-yellow-100";
+        else statusKleur = "bg-green-100";
+        return { ...m, statusKleur };
+      });
     setMedewerkers(medewerkersMetKleur);
     setIsLoaded(true);
   }, [localBeschikbaarheid]);
@@ -89,7 +90,6 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
 
     setTotaleLoonkosten(totaal);
   }, [medewerkers, planning, loonkostenPerUur]);
-  }, [localBeschikbaarheid]);
 
   async function opslaanNaarR2() {
     const bestanden = [
@@ -100,7 +100,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
 
     for (const bestand of bestanden) {
       try {
-      await uploadJSONBestandS3(bestand.naam, bestand.inhoud);
+        await uploadJSONBestandS3(bestand.naam, bestand.inhoud);
       } catch (err) {
         alert(`❌ Upload van ${bestand.naam} mislukt: ${err.message}`);
         return;
