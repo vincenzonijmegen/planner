@@ -73,24 +73,24 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
   useEffect(() => {
     let totaal = 0;
 
-    const functieKosten = (functie) => {
-      return dagen.reduce((dagTotaal, dag) => {
-        return dagTotaal + shifts.reduce((shiftTotaal, shift) => {
-          const medewerkersShift = medewerkers.filter((m) => planning[m.naam]?.[dag]?.[shift]?.functie === functie);
-          return shiftTotaal + medewerkersShift.reduce((s, m) => {
-            const leeftijd = typeof m.leeftijd === "number" ? m.leeftijd : 18;
-            const uurloon = loonkostenPerUur[leeftijd] ?? 15;
-            const soort = planning[m.naam]?.[dag]?.[shift]?.soort;
-            const uren = soort === "standby" || soort === "laat" ? 4 : 6;
-            return s + uren * uurloon;
-          }, 0);
-        }, 0);
-      }, 0);
-    };
+    for (const naam in planning) {
+      const medewerkerData = localBeschikbaarheid?.[naam.toLowerCase()];
+      const leeftijd = medewerkerData?.leeftijd ?? 18;
+      const uurloon = loonkostenPerUur[leeftijd] ?? 15;
 
-    const totaalKosten = functieKosten("ijsbereider") + functieKosten("ijsvoorbereider") + functieKosten("schepper");
-    setTotaleLoonkosten(totaalKosten);
-  }, [planning, loonkostenPerUur, medewerkers]);
+      for (const dag in planning[naam]) {
+        for (const shift in planning[naam][dag]) {
+          const entry = planning[naam][dag][shift];
+          if (!entry) continue;
+
+          const uren = entry.soort === "standby" || entry.soort === "laat" ? 4 : 6;
+          totaal += uren * uurloon;
+        }
+      }
+    }
+
+    setTotaleLoonkosten(totaal);
+  }, [planning, loonkostenPerUur, localBeschikbaarheid]);
 
   async function opslaanNaarR2() {
     const bestanden = [
