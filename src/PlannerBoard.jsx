@@ -329,3 +329,4 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
 )}
 </div>
   );
+}
