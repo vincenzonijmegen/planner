@@ -98,8 +98,45 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
             💾 Opslaan naar Cloudflare R2
           </button>
         </div>
-      </div>
-    );
+      {popup && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white p-4 rounded-lg shadow-xl w-72">
+            <h2 className="text-lg font-semibold mb-2">Kies functie & soort</h2>
+            <div className="space-y-2">
+              {["schepper", "ijsbereider", "ijsvoorbereider"].map((functie) => (
+                <div key={functie} className="flex gap-2">
+                  {["vast", "standby", "laat"].map((soort) => (
+                    <button
+                      key={soort}
+                      onClick={() => {
+                        const { medewerker, dag, shift } = popup;
+                        const naamKey = medewerker.trim().toLowerCase();
+                        setPlanning((prev) => {
+                          const nieuw = { ...prev };
+                          if (!nieuw[naamKey]) nieuw[naamKey] = {};
+                          if (!nieuw[naamKey][dag]) nieuw[naamKey][dag] = {};
+                          nieuw[naamKey][dag][shift] = { functie, soort };
+                          localStorage.setItem("planning", JSON.stringify(nieuw));
+                          return nieuw;
+                        });
+                        setPopup(null);
+                      }}
+                      className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+                    >
+                      {functie} ({soort})
+                    </button>
+                  ))}
+                </div>
+              ))}
+            </div>
+            <button onClick={() => setPopup(null)} className="mt-4 text-sm text-gray-500 hover:underline">
+              Annuleren
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
   }
 
   return (
