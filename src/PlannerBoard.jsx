@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import * as XLSX from "xlsx";
 
+
 import {
   getShiftCountPerMedewerker,
   importeerBeschikbaarheidKnop,
@@ -11,6 +12,7 @@ import { dagMap } from "./utils/dagen";
 import { exportToPDF } from "./utils/exportToPDF";
 import { kleurSchema } from "./utils/kleurSchema";
 import { fetchJSONBestand, uploadJSONBestand } from "./utils/r2Client";
+import { uploadJSONBestandS3 } from "./utils/r2ClientUpload";
 
 const dagen = ["ma", "di", "wo", "do", "vr", "za", "zo"];
 const shifts = [1, 2];
@@ -75,7 +77,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
 
     for (const bestand of bestanden) {
       try {
-        await uploadJSONBestand(bestand.naam, bestand.inhoud);
+      await uploadJSONBestandS3(bestand.naam, bestand.inhoud);
       } catch (err) {
         alert(`❌ Upload van ${bestand.naam} mislukt: ${err.message}`);
         return;
