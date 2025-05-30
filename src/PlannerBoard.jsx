@@ -73,9 +73,9 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
   useEffect(() => {
     let totaal = 0;
 
-    for (const m of medewerkers) {
-      const naam = m.naam;
-      const leeftijd = m.leeftijd ?? 18;
+    for (const naam in planning) {
+      const medewerker = medewerkers.find(m => m.naam.toLowerCase() === naam.toLowerCase());
+      const leeftijd = medewerker?.leeftijd ?? 18;
       const uurloon = loonkostenPerUur[leeftijd] ?? 15;
 
       for (const dag of dagen) {
