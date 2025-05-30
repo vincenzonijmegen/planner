@@ -1,14 +1,5 @@
-// ✅ Complete aangepaste JSX inclusief volledige layout, knoppenstructuur, loonkostenoverzicht en planningsrooster
-
 import React, { useState, useEffect } from "react";
-import { createClient } from "@supabase/supabase-js";
 import * as XLSX from "xlsx";
-
-import {
-  SUPABASE_PROJECT_URL,
-  SUPABASE_API_KEY,
-  SUPABASE_BUCKET
-} from "./config";
 
 import {
   getShiftCountPerMedewerker,
@@ -19,8 +10,8 @@ import {
 import { dagMap } from "./utils/dagen";
 import { exportToPDF } from "./utils/exportToPDF";
 import { kleurSchema } from "./utils/kleurSchema";
+import { fetchJSONBestand, uploadJSONBestand } from "./utils/r2Client";
 
-const supabase = createClient(SUPABASE_PROJECT_URL, SUPABASE_API_KEY);
 const dagen = ["ma", "di", "wo", "do", "vr", "za", "zo"];
 const shifts = [1, 2];
 
@@ -37,24 +28,16 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
     async function fetchGegevens() {
       const bestanden = ["planning.json", "beschikbaarheid.json", "loonkosten.json"];
       for (const bestand of bestanden) {
-        const { data, error } = await supabase.storage.from(SUPABASE_BUCKET).download(bestand);
-        if (error) {
-          if (error.status === 404) {
-            console.warn(`⛔ Bestand ${bestand} niet gevonden, wordt overgeslagen.`);
-            continue;
-          } else {
-            console.error(`❌ Fout bij ophalen ${bestand}:`, error.message);
-            alert(`Fout bij ophalen van ${bestand}: ${error.message}`);
-            continue;
+        try {
+          const json = await fetchJSONBestand(bestand);
+          if (bestand === "planning.json") {
+            setPlanning(json);
+            localStorage.setItem("planning", JSON.stringify(json));
           }
-        }
-        if (data) {
-          const text = await data.text();
-          const json = JSON.parse(text);
-          if (bestand === "planning.json") setPlanning(json);
-          localStorage.setItem("planning", JSON.stringify(json));
           if (bestand === "beschikbaarheid.json") setLocalBeschikbaarheid(json);
           if (bestand === "loonkosten.json") setLoonkostenPerUur(json);
+        } catch (err) {
+          console.warn(`⛔ Bestand ${bestand} niet gevonden:`, err.message);
         }
       }
     }
@@ -62,22 +45,17 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
   }, []);
 
   useEffect(() => {
-    console.log("📊 localBeschikbaarheid:", localBeschikbaarheid);
-  if (!localBeschikbaarheid || Object.keys(localBeschikbaarheid).length === 0) return;
+    if (!localBeschikbaarheid || Object.keys(localBeschikbaarheid).length === 0) return;
 
-  const gegenereerd = Object.entries(localBeschikbaarheid).map(([naamKey, data]) => {
-    return {
+    const gegenereerd = Object.entries(localBeschikbaarheid).map(([naamKey, data]) => ({
       naam: naamKey,
       leeftijd: data?.leeftijd ?? 18,
       maxShifts: data?.maxShifts ?? 3,
       opmerking: data?.opmerking || null
-    };
-  });
+    }));
 
-  if (gegenereerd.length > 0) {
     const medewerkersMetKleur = gegenereerd.map(m => {
-    const ingepland = shiftCountPerMedewerker[m.naam.toLowerCase()] || 0;
-
+      const ingepland = shiftCountPerMedewerker[m.naam.toLowerCase()] || 0;
       let statusKleur = "";
       if (ingepland > m.maxShifts) statusKleur = "bg-red-200";
       else if (ingepland < m.maxShifts) statusKleur = "bg-yellow-100";
@@ -85,12 +63,10 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
       return { ...m, statusKleur };
     });
     setMedewerkers(medewerkersMetKleur);
-  }
-  setIsLoaded(true);
-}, [localBeschikbaarheid]);
+    setIsLoaded(true);
+  }, [localBeschikbaarheid]);
 
-
-  async function opslaanNaarSupabase() {
+  async function opslaanNaarR2() {
     const bestanden = [
       { naam: "planning.json", inhoud: planning },
       { naam: "beschikbaarheid.json", inhoud: localBeschikbaarheid },
@@ -99,23 +75,13 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
 
     for (const bestand of bestanden) {
       try {
-        const blob = new Blob([JSON.stringify(bestand.inhoud, null, 2)], { type: "application/json" });
-        const { error } = await supabase.storage.from(SUPABASE_BUCKET).upload(bestand.naam, blob, {
-          contentType: "application/json",
-          upsert: true
-        });
-        if (error) {
-          console.error(`❌ Fout bij uploaden ${bestand.naam}:`, error.message);
-          alert(`Fout bij uploaden van ${bestand.naam}: ${error.message}`);
-          return;
-        }
+        await uploadJSONBestand(bestand.naam, bestand.inhoud);
       } catch (err) {
-        console.error(`❌ Fout tijdens verwerking van ${bestand.naam}:`, err);
-        alert(`Verwerkingsfout voor ${bestand.naam}: ${err.message}`);
+        alert(`❌ Upload van ${bestand.naam} mislukt: ${err.message}`);
         return;
       }
     }
-    alert("✅ Alles succesvol opgeslagen naar Supabase!");
+    alert("✅ Alles succesvol opgeslagen naar R2!");
   }
 
   if (!isLoaded) return <div className="p-4 text-gray-500">⏳ Bezig met laden...</div>;
@@ -127,53 +93,15 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
         {React.cloneElement(importeerLoonkostenKnop(setLoonkostenPerUur), {
           className: "bg-blue-600 text-white px-4 py-2 rounded shadow"
         })}
-        <button onClick={opslaanNaarSupabase} className="bg-indigo-600 text-white px-4 py-2 rounded shadow">
-          💾 Opslaan naar Supabase
-        </button>
-        <button onClick={() => {
-          const blob = new Blob([JSON.stringify(planning, null, 2)], { type: "application/json" });
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement("a");
-          link.href = url;
-          link.download = "planning.json";
-          document.body.appendChild(link);
-          link.click();
-          link.remove();
-        }} className="bg-gray-700 text-white px-4 py-2 rounded shadow">
-          ⬇️ Download planning.json
+        <button onClick={opslaanNaarR2} className="bg-indigo-600 text-white px-4 py-2 rounded shadow">
+          💾 Opslaan naar Cloudflare R2
         </button>
         <button
-          onClick={() =>
-            exportToPDF({ medewerkers, planning, beschikbaarheid: localBeschikbaarheid, loonkostenPerUur, shiftCountPerMedewerker })
-          }
+          onClick={() => exportToPDF({ medewerkers, planning, beschikbaarheid: localBeschikbaarheid, loonkostenPerUur, shiftCountPerMedewerker })}
           className="bg-red-600 text-white px-4 py-2 rounded shadow"
         >
           📄 Exporteer naar PDF
         </button>
-        <label className="bg-yellow-600 text-white px-4 py-2 rounded shadow cursor-pointer">
-          📂 Importeer planning
-          <input
-            type="file"
-            accept="application/json"
-            className="hidden"
-            onChange={(e) => {
-              const file = e.target.files[0];
-              if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                  try {
-                    const json = JSON.parse(event.target.result);
-                    setPlanning(json);
-                    localStorage.setItem("planning", JSON.stringify(json));
-                  } catch {
-                    alert("Kon planning niet laden, controleer het bestand.");
-                  }
-                };
-                reader.readAsText(file);
-              }
-            }}
-          />
-        </label>
       </div>
 
       {popup && (
@@ -186,11 +114,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
               {["ijsbereider", "ijsvoorbereider", "schepper"].flatMap((functie) =>
                 ["vast", "standby", "laat"].map((soort) => {
                   const label =
-                    soort === "standby"
-                      ? `⏱️ ${functie}`
-                      : soort === "laat"
-                      ? `🌙 ${functie}`
-                      : functie;
+                    soort === "standby" ? `⏱️ ${functie}` : soort === "laat" ? `🌙 ${functie}` : functie;
                   return (
                     <button
                       key={`${functie}-${soort}`}
@@ -222,84 +146,19 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
           </div>
         </div>
       )}
-    {medewerkers.length > 0 && (
-        <div className="overflow-x-auto mb-4">
-          <table className="text-xs border-collapse w-full bg-white shadow">
-            <thead className="sticky top-0 bg-white z-10 shadow-sm">
-              <tr>
-                <th className="border px-2 py-1 w-60 text-left">Type</th>
-                {dagen.map((dag) =>
-                  shifts.map((shift) => (
-                    <th key={`${dag}-${shift}`} className="border px-2 py-1 text-center" style={{ borderLeftWidth: shift === 1 ? '2px' : undefined }}>
-                      {dag} {shift}
-                    </th>
-                  ))
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="border px-2 py-1 font-semibold bg-gray-100">Totaal ingepland</td>
-                {dagen.map((dag) =>
-                  shifts.map((shift) => {
-                    const totaal = medewerkers.filter((m) => {
-                      const entry = planning[m.naam]?.[dag]?.[shift];
-                      return entry?.functie === "ijsbereider" || entry?.functie === "ijsvoorbereider" || entry?.functie === "schepper";
-                    }).length;
-                    return (
-                      <td
-                        key={`Totaal-${dag}-${shift}`}
-                        className="border px-2 py-1 text-center bg-gray-50 font-semibold"
-                        style={{ borderLeftWidth: shift === 1 ? '2px' : undefined }}
-                      >
-                        {totaal}
-                      </td>
-                    );
-                  })
-                )}
-              </tr>
-              {["Bereiders", "Voorbereiders", "Scheppers", "Kosten"].map((type) => (
-                <tr key={type}>
-                  <td className="border px-2 py-1 font-semibold">{type}</td>
-                  {dagen.map((dag) =>
-                    shifts.map((shift) => {
-                      let value = 0;
-                      if (type === "Kosten") {
-                        value = medewerkers.reduce((totaal, m) => {
-                          const entry = planning[m.naam]?.[dag]?.[shift];
-                          if (!entry) return totaal;
-                          let uren = 6;
-                          if (entry.soort === "standby") uren = 4;
-                          else if (entry.soort === "laat") uren = 4;
-                          const leeftijd = typeof m.leeftijd === "number" ? m.leeftijd : 18;
-                          const uurloon = loonkostenPerUur[leeftijd] ?? 15;
-                          return totaal + uren * uurloon;
-                        }, 0);
-                      } else {
-                        const functieMap = {
-                          Bereiders: "ijsbereider",
-                          Voorbereiders: "ijsvoorbereider",
-                          Scheppers: "schepper",
-                        };
-                        const functie = functieMap[type];
-                        value = medewerkers.filter(
-                          (m) => planning[m.naam]?.[dag]?.[shift]?.functie === functie
-                        ).length;
-                      }
-                      return (
-                        <td key={`${type}-${dag}-${shift}`} className="border px-2 py-1 text-center" style={{ borderLeftWidth: shift === 1 ? '2px' : undefined }}>
-                          {type === "Kosten" ? `€ ${Math.round(value)}` : value}
-                        </td>
-                      );
-                    })
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    <table className="table-fixed border w-full bg-white text-xs font-sans">
+
+      <table className="table-fixed border w-full bg-white text-xs font-sans">
+        <thead>
+          <tr>
+            <th className="border px-4 py-2 text-left w-60">Naam</th>
+            {dagen.map((dag) =>
+              shifts.map((shift) => (
+                <th key={`${dag}-${shift}`} className="border px-2 py-1 text-center">
+                  {dag} {shift}
+                </th>
+              ))
+            )}
+          </tr>
         <thead>
           <tr>
             <th className="border px-4 py-2 text-left w-60">Naam</th>
@@ -313,18 +172,71 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
           </tr>
         </thead>
         <tbody>
+          <tr>
+            <td className="border px-2 py-1 font-semibold bg-gray-100">Totaal ingepland</td>
+            {dagen.map((dag) =>
+              shifts.map((shift) => {
+                const totaal = medewerkers.filter((m) => {
+                  const entry = planning[m.naam]?.[dag]?.[shift];
+                  return entry?.functie === "ijsbereider" || entry?.functie === "ijsvoorbereider" || entry?.functie === "schepper";
+                }).length;
+                return (
+                  <td
+                    key={`Totaal-${dag}-${shift}`}
+                    className="border px-2 py-1 text-center bg-gray-50 font-semibold"
+                    style={{ borderLeftWidth: shift === 1 ? '2px' : undefined }}
+                  >
+                    {totaal}
+                  </td>
+                );
+              })
+            )}
+          </tr>
+          {['Bereiders', 'Voorbereiders', 'Scheppers', 'Kosten'].map((type) => (
+            <tr key={type}>
+              <td className="border px-2 py-1 font-semibold">{type}</td>
+              {dagen.map((dag) =>
+                shifts.map((shift) => {
+                  let value = 0;
+                  if (type === "Kosten") {
+                    value = medewerkers.reduce((totaal, m) => {
+                      const entry = planning[m.naam]?.[dag]?.[shift];
+                      if (!entry) return totaal;
+                      let uren = 6;
+                      if (entry.soort === "standby" || entry.soort === "laat") uren = 4;
+                      const leeftijd = typeof m.leeftijd === "number" ? m.leeftijd : 18;
+                      const uurloon = loonkostenPerUur[leeftijd] ?? 15;
+                      return totaal + uren * uurloon;
+                    }, 0);
+                  } else {
+                    const functieMap = {
+                      Bereiders: "ijsbereider",
+                      Voorbereiders: "ijsvoorbereider",
+                      Scheppers: "schepper",
+                    };
+                    const functie = functieMap[type];
+                    value = medewerkers.filter(
+                      (m) => planning[m.naam]?.[dag]?.[shift]?.functie === functie
+                    ).length;
+                  }
+                  return (
+                    <td key={`${type}-${dag}-${shift}`} className="border px-2 py-1 text-center" style={{ borderLeftWidth: shift === 1 ? '2px' : undefined }}>
+                      {type === "Kosten" ? `€ ${Math.round(value)}` : value}
+                    </td>
+                  );
+                })
+              )}
+            </tr>
+          ))}
+        </tbody>
           {medewerkers.map((m) => {
             const naamKey = m.naam.trim().toLowerCase();
             return (
               <tr key={m.naam}>
-  
-          <td className={`border px-4 py-2 text-left whitespace-nowrap w-60 font-bold ${m.statusKleur}`}>
-          {m.naam.replace(/\b\w/g, c => c.toUpperCase())} [{m.leeftijd ?? "?"}] ({shiftCountPerMedewerker[m.naam] || 0}/{m.maxShifts ?? "?"})
-          {m.opmerking && <span title={m.opmerking} className="ml-1 text-red-600">📌</span>}
-          </td>
-
-
-
+                <td className={`border px-4 py-2 text-left whitespace-nowrap w-60 font-bold ${m.statusKleur}`}>
+                  {m.naam.replace(/\b\w/g, c => c.toUpperCase())} [{m.leeftijd ?? "?"}] ({shiftCountPerMedewerker[m.naam] || 0}/{m.maxShifts ?? "?"})
+                  {m.opmerking && <span title={m.opmerking} className="ml-1 text-red-600">📌</span>}
+                </td>
                 {dagen.map((dag) =>
                   shifts.map((shift) => {
                     const entry = planning[m.naam]?.[dag]?.[shift];
