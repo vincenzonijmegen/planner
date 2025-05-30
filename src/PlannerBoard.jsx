@@ -71,11 +71,14 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
   }, [localBeschikbaarheid]);
 
   useEffect(() => {
-    if (!Object.keys(localBeschikbaarheid).length) return;
     let totaal = 0;
 
     for (const naam in planning) {
-      const medewerkerData = localBeschikbaarheid?.[naam.toLowerCase()];
+      const medewerkerData =
+        localBeschikbaarheid?.[naam] ??
+        localBeschikbaarheid?.[naam.trim()] ??
+        localBeschikbaarheid?.[naam.trim().toLowerCase()];
+
       const leeftijd = medewerkerData?.leeftijd ?? 18;
       const uurloon = loonkostenPerUur[leeftijd] ?? 15;
 
