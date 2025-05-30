@@ -180,7 +180,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
                 </td>
                 {dagen.map((dag) =>
                   shifts.map((shift) => {
-                    const entry = planning[m.naam]?.[dag]?.[shift];
+                    const entry = planning[naamKey]?.[dag]?.[shift];
                     const beschikbaar = localBeschikbaarheid?.[naamKey]?.[dagMap[dag]]?.[shift];
                     let text = "";
                     let bgColor = "#ffffff";
@@ -218,9 +218,9 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
                           if (entry) {
                             setPlanning((prev) => {
                               const nieuw = { ...prev };
-                              delete nieuw[m.naam][dag][shift];
-                              if (Object.keys(nieuw[m.naam][dag]).length === 0) delete nieuw[m.naam][dag];
-                              if (Object.keys(nieuw[m.naam]).length === 0) delete nieuw[m.naam];
+                              delete nieuw[naamKey][dag][shift];
+                              if (Object.keys(nieuw[naamKey][dag]).length === 0) delete nieuw[naamKey][dag];
+                              if (Object.keys(nieuw[naamKey]).length === 0) delete nieuw[naamKey];
                               localStorage.setItem("planning", JSON.stringify(nieuw));
                               return nieuw;
                             });
