@@ -73,14 +73,14 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
   useEffect(() => {
     let totaal = 0;
 
-    for (const naam of Object.keys(planning)) {
-      const medewerker = medewerkers.find(m => m.naam === naam);
-      const leeftijd = medewerker?.leeftijd ?? 18;
+    for (const m of medewerkers) {
+      const naam = m.naam;
+      const leeftijd = m.leeftijd ?? 18;
       const uurloon = loonkostenPerUur[leeftijd] ?? 15;
 
       for (const dag of dagen) {
         for (const shift of shifts) {
-          const entry = planning?.[naam]?.[dag]?.[String(shift)];
+          const entry = planning?.[naam]?.[dag]?.[shift];
           if (!entry) continue;
 
           const uren = entry.soort === "standby" || entry.soort === "laat" ? 4 : 6;
