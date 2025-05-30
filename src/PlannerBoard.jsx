@@ -24,28 +24,30 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const shiftCountPerMedewerker = getShiftCountPerMedewerker(planning);
 
-  useEffect(() => {
-    async function fetchGegevens() {
-      const bestanden = ["planning.json", "beschikbaarheid.json", "loonkosten.json"];
-      for (const bestand of bestanden) {
-        try {
-          const url = `https://vincenzo-uploads.48b3ca960ac98a5b99df6b74d8cf4b3e.r2.cloudflarestorage.com/public/${bestand}`;
-          const res = await fetch(url, { cache: "no-store" });
-          if (!res.ok) throw new Error(`Fout bij ophalen van ${bestand}: ${res.statusText}`);
-          const json = await res.json();
-          if (bestand === "planning.json") {
-            setPlanning(json);
-            localStorage.setItem("planning", JSON.stringify(json));
-          }
-          if (bestand === "beschikbaarheid.json") setLocalBeschikbaarheid(json);
-          if (bestand === "loonkosten.json") setLoonkostenPerUur(json);
-        } catch (err) {
-          console.warn(`⛔ Bestand ${bestand} niet gevonden:`, err.message);
+useEffect(() => {
+  async function fetchGegevens() {
+    const bestanden = ["planning.json", "beschikbaarheid.json", "loonkosten.json"];
+    for (const bestand of bestanden) {
+      try {
+        const url = `https://planner-upload.herman-48b.workers.dev/upload/public/${bestand}`;
+        const res = await fetch(url, { cache: "no-store" });
+        if (!res.ok) throw new Error(`Fout bij ophalen van ${bestand}: ${res.statusText}`);
+        const json = await res.json();
+
+        if (bestand === "planning.json") {
+          setPlanning(json);
+          localStorage.setItem("planning", JSON.stringify(json));
         }
+        if (bestand === "beschikbaarheid.json") setLocalBeschikbaarheid(json);
+        if (bestand === "loonkosten.json") setLoonkostenPerUur(json);
+      } catch (err) {
+        console.warn(`⛔ Bestand ${bestand} niet gevonden:`, err.message);
       }
     }
-    fetchGegevens();
-  }, []);
+  }
+  fetchGegevens();
+}, []);
+
 
   useEffect(() => {
     if (!localBeschikbaarheid || Object.keys(localBeschikbaarheid).length === 0) return;
