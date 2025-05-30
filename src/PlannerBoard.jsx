@@ -200,6 +200,18 @@ if (!isLoaded && medewerkers.length === 0) {
               })
             )}
           </tr>
+
+          <tr>
+  <td className="border px-2 py-1 font-semibold bg-white">&nbsp;</td>
+  {dagen.map((dag) =>
+    shifts.map((shift) => (
+      <th key={`kop-boven-medewerkers-${dag}-${shift}`} className="border px-2 py-1 text-center bg-white">
+        {dag} {shift}
+      </th>
+    ))
+  )}
+</tr>
+
           {['Bereiders', 'Voorbereiders', 'Scheppers', 'Kosten'].map((type) => (
             <tr key={type}>
               <td className="border px-2 py-1 font-semibold">{type}</td>
