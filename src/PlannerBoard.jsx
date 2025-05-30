@@ -214,13 +214,14 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
                           fontWeight: "bold"
                         }}
                         onClick={() => {
-                          const entry = planning[naamKey]?.[dag]?.[shift];
+                          const key = m.naam.trim().toLowerCase();
+                          const entry = planning[key]?.[dag]?.[shift];
                           if (entry) {
                             setPlanning((prev) => {
                               const nieuw = { ...prev };
-                              delete nieuw[naamKey][dag][shift];
-                              if (Object.keys(nieuw[naamKey][dag]).length === 0) delete nieuw[naamKey][dag];
-                              if (Object.keys(nieuw[naamKey]).length === 0) delete nieuw[naamKey];
+                              delete nieuw[key][dag][shift];
+                              if (Object.keys(nieuw[key][dag]).length === 0) delete nieuw[key][dag];
+                              if (Object.keys(nieuw[key]).length === 0) delete nieuw[key];
                               localStorage.setItem("planning", JSON.stringify(nieuw));
                               return nieuw;
                             });
