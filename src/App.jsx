@@ -6,7 +6,6 @@ export default function App() {
   const [planning, setPlanning] = useState({});
   const [beschikbaarheid, setBeschikbaarheid] = useState({});
   const [medewerkers, setMedewerkers] = useState([]);
-  const [totaleLoonkosten, setTotaleLoonkosten] = useState(0);
 
   const fetchJSON = async (bestandsnaam, setFunctie) => {
     const SUPABASE_PUBLIC_BASE = `${SUPABASE_PROJECT_URL}/storage/v1/object/public/plannerdata`;
@@ -30,16 +29,11 @@ export default function App() {
 
   return (
     <div className="p-4">
-      <div className="text-right text-lg font-bold mb-2">
-        Totale loonkosten: €{totaleLoonkosten.toFixed(2)}
-      </div>
-
       <PlannerBoard
         medewerkers={medewerkers}
         beschikbaarheid={beschikbaarheid}
         planning={planning}
         setPlanning={setPlanning}
-        onTotalLoonkostenChange={setTotaleLoonkosten}
       />
     </div>
   );
