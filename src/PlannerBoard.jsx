@@ -71,25 +71,22 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
   }, [localBeschikbaarheid]);
 
   useEffect(() => {
-    const totaal = medewerkers.reduce((som, m) => {
-      const leeftijd = m.leeftijd ?? 18;
-      const uurloon = loonkostenPerUur[leeftijd] ?? 15;
-      
-
-      const perPersoon = dagen.reduce((dagSom, dag) => {
-        return dagSom + shifts.reduce((shiftSom, shift) => {
-          const entry = planning[m.naam]?.[dag]?.[shift];
-          if (!entry) return shiftSom;
-          let uren = entry.soort === "standby" || entry.soort === "laat" ? 4 : 6;
-          return shiftSom + uren * uurloon;
-        }, 0);
-      }, 0);
-
-      return som + perPersoon;
-    }, 0);
-
+    let totaal = 0;
+    for (const naam in planning) {
+      for (const dag in planning[naam]) {
+        for (const shift in planning[naam][dag]) {
+          const entry = planning[naam][dag][shift];
+          if (!entry) continue;
+          const medewerker = medewerkers.find(m => m.naam === naam);
+          const leeftijd = medewerker?.leeftijd ?? 18;
+          const uurloon = loonkostenPerUur[leeftijd] ?? 15;
+          const uren = entry.soort === "standby" || entry.soort === "laat" ? 4 : 6;
+          totaal += uren * uurloon;
+        }
+      }
+    }
     setTotaleLoonkosten(totaal);
-  }, [medewerkers, planning, loonkostenPerUur]);
+  }, [planning, medewerkers, loonkostenPerUur]);
 
   async function opslaanNaarR2() {
     const bestanden = [
