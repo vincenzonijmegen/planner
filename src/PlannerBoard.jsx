@@ -55,7 +55,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
       opmerking: data?.opmerking || null
     }));
 
-    const medewerkersMetKleur = tegenereerd.map(m => {
+    const medewerkersMetKleur = gegenereerd.map(m => {
       const ingepland = shiftCountPerMedewerker[m.naam.toLowerCase()] || 0;
       let statusKleur = "";
       if (ingepland > m.maxShifts) statusKleur = "bg-red-200";
