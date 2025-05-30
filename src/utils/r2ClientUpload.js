@@ -12,12 +12,16 @@ const s3 = new S3Client({
 });
 
 export async function uploadJSONBestandS3(naam, inhoud) {
+    
   const params = {
     Bucket: "vincenzo-uploads",
     Key: naam,
     Body: JSON.stringify(inhoud, null, 2),
     ContentType: "application/json"
   };
+
+
+
 
   try {
     const command = new PutObjectCommand(params);
@@ -27,4 +31,11 @@ export async function uploadJSONBestandS3(naam, inhoud) {
     console.error(`❌ Upload van ${naam} mislukt:`, err);
     throw err;
   }
+}
+
+  export async function fetchJSONBestandS3(naam) {
+  const url = `https://vincenzo-uploads.48b3ca960ac98a5b99df6b74d8cf4b3e.r2.cloudflarestorage.com/${naam}?t=${Date.now()}`;
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) throw new Error(`Fout bij ophalen van ${naam}: ${res.statusText}`);
+  return res.json();
 }
