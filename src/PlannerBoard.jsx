@@ -142,7 +142,6 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
     shifts.map((shift) => {
       const totaal = medewerkers.reduce((som, m) => {
         const naamKey = m.naam.trim().toLowerCase();
-        const naamKey = m.naam.trim().toLowerCase();
                     const entry = planning[naamKey]?.[dag]?.[shift];
         if (!entry) return som;
         const uren = (entry.soort === "standby" || entry.soort === "laat") ? 4 : 6;
