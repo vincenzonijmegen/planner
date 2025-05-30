@@ -71,6 +71,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
   }, [localBeschikbaarheid]);
 
   useEffect(() => {
+    if (!Object.keys(localBeschikbaarheid).length) return;
     let totaal = 0;
 
     for (const naam in planning) {
