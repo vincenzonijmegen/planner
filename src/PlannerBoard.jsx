@@ -80,7 +80,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
 
       for (const dag of dagen) {
         for (const shift of shifts) {
-          const entry = planning?.[naam]?.[dag]?.[shift];
+          const entry = planning?.[naam]?.[dag]?.[String(shift)];
           if (!entry) continue;
 
           const uren = entry.soort === "standby" || entry.soort === "laat" ? 4 : 6;
