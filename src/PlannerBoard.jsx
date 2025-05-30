@@ -148,29 +148,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
       )}
 
       <table className="table-fixed border w-full bg-white text-xs font-sans">
-        <thead>
-          <tr>
-            <th className="border px-4 py-2 text-left w-60">Naam</th>
-            {dagen.map((dag) =>
-              shifts.map((shift) => (
-                <th key={`${dag}-${shift}`} className="border px-2 py-1 text-center">
-                  {dag} {shift}
-                </th>
-              ))
-            )}
-          </tr>
-        <thead>
-          <tr>
-            <th className="border px-4 py-2 text-left w-60">Naam</th>
-            {dagen.map((dag) =>
-              shifts.map((shift) => (
-                <th key={`${dag}-${shift}`} className="border px-2 py-1 text-center">
-                  {dag} {shift}
-                </th>
-              ))
-            )}
-          </tr>
-        </thead>
+        
         <tbody>
           <tr>
             <td className="border px-2 py-1 font-semibold bg-gray-100">Totaal ingepland</td>
