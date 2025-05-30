@@ -74,11 +74,11 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
     const totaal = medewerkers.reduce((som, m) => {
       const leeftijd = m.leeftijd ?? 18;
       const uurloon = loonkostenPerUur[leeftijd] ?? 15;
+      const naamKey = m.naam.trim().toLowerCase();
 
       const perPersoon = dagen.reduce((dagSom, dag) => {
         return dagSom + shifts.reduce((shiftSom, shift) => {
-          const naamKey = m.naam.trim().toLowerCase();
-const entry = planning[naamKey]?.[dag]?.[shift];
+          const entry = planning[naamKey]?.[dag]?.[shift];
           if (!entry) return shiftSom;
           let uren = entry.soort === "standby" || entry.soort === "laat" ? 4 : 6;
           return shiftSom + uren * uurloon;
