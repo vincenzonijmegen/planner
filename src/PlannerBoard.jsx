@@ -206,6 +206,8 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
               )}
             </tr>
           ))}
+
+          
         
           {medewerkers.map((m) => {
             const naamKey = m.naam.trim().toLowerCase();
