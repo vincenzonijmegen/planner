@@ -29,7 +29,7 @@ useEffect(() => {
     const bestanden = ["planning.json", "beschikbaarheid.json", "loonkosten.json"];
     for (const bestand of bestanden) {
       try {
-        const url = `https://planner-upload.herman-48b.workers.dev/upload/public/${bestand}`;
+        const url = `https://planner-upload-v2.herman-48b.workers.dev/upload/public/${bestand}`;
         const res = await fetch(url, { cache: "no-store" });
         if (!res.ok) throw new Error(`Fout bij ophalen van ${bestand}: ${res.statusText}`);
         const json = await res.json();
