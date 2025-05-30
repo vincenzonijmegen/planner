@@ -57,7 +57,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
       opmerking: data?.opmerking || null
     }));
 
-    const medewerkersMetKleur = tegenereerd
+    const medewerkersMetKleur = gegenereerd
       .filter(m => !teamFilter || m.teamkleur === teamFilter)
       .map(m => {
         const ingepland = shiftCountPerMedewerker[m.naam.toLowerCase()] || 0;
