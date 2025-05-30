@@ -11,7 +11,7 @@ import { dagMap } from "./utils/dagen";
 import { exportToPDF } from "./utils/exportToPDF";
 import { kleurSchema } from "./utils/kleurSchema";
 import { uploadJSONBestandS3 } from "./utils/r2ClientUpload";
-import { fetchJSONBestandS3 } from "./utils/r2ClientDownload";
+import { uploadJSONBestandS3 } from "./utils/r2ClientUpload";
 
 const dagen = ["ma", "di", "wo", "do", "vr", "za", "zo"];
 const shifts = [1, 2];
@@ -30,7 +30,10 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
       const bestanden = ["planning.json", "beschikbaarheid.json", "loonkosten.json"];
       for (const bestand of bestanden) {
         try {
-          const json = await fetchJSONBestandS3(bestand);
+          const url = `https://vincenzo-uploads.48b3ca960ac98a5b99df6b74d8cf4b3e.r2.dev/${bestand}?t=${Date.now()}`;
+          const res = await fetch(url, { cache: "no-store" });
+          if (!res.ok) throw new Error(`Fout bij ophalen van ${bestand}: ${res.statusText}`);
+          const json = await res.json();
           if (bestand === "planning.json") {
             setPlanning(json);
             localStorage.setItem("planning", JSON.stringify(json));
