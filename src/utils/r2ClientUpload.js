@@ -1,40 +1,26 @@
 // src/utils/r2ClientUpload.js
 
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-
-const s3 = new S3Client({
-  region: "auto",
-  endpoint: "https://48b3ca960ac98a5b99df6b74d8cf4b3e.r2.cloudflarestorage.com",
-  credentials: {
-    accessKeyId: "06b21b255faeafccee2aaae9d42fa93e",
-    secretAccessKey: "c4475ecaa6399f32ba8814bbdf8d46e91cc0e8fc7828d48688212cfb9905a67c"
-  }
-});
-
 export async function uploadJSONBestandS3(naam, inhoud) {
-    
-  const params = {
-    Bucket: "vincenzo-uploads",
-    Key: naam,
-    Body: JSON.stringify(inhoud, null, 2),
-    ContentType: "application/json"
-  };
+  const url = `https://planner-upload.herman-48b.workers.dev/upload/${naam}`;
+  const response = await fetch(url, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(inhoud, null, 2)
+  });
 
-
-
-
-  try {
-    const command = new PutObjectCommand(params);
-    await s3.send(command);
-    console.log(`✅ Upload van ${naam} naar R2 succesvol`);
-  } catch (err) {
-    console.error(`❌ Upload van ${naam} mislukt:`, err);
-    throw err;
+  if (!response.ok) {
+    const tekst = await response.text();
+    console.error(`❌ Upload van ${naam} mislukt:`, tekst);
+    throw new Error(`Upload mislukt (${response.status}): ${tekst}`);
   }
+
+  console.log(`✅ Upload van ${naam} via Worker succesvol`);
 }
 
-  export async function fetchJSONBestandS3(naam) {
-  const url = `https://vincenzo-uploads.48b3ca960ac98a5b99df6b74d8cf4b3e.r2.cloudflarestorage.com/${naam}?t=${Date.now()}`;
+export async function fetchJSONBestandS3(naam) {
+  const url = `https://pub-65122688c07f4edb9f2388c313f85a02.r2.dev/${naam}?t=${Date.now()}`;
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) throw new Error(`Fout bij ophalen van ${naam}: ${res.statusText}`);
   return res.json();
