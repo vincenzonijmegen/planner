@@ -22,8 +22,8 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
   const [popup, setPopup] = useState(null);
   const [localBeschikbaarheid, setLocalBeschikbaarheid] = useState(beschikbaarheidProp);
   const [medewerkers, setMedewerkers] = useState([]);
-    const [isLoaded, setIsLoaded] = useState(false);
-    const shiftCountPerMedewerker = getShiftCountPerMedewerker(planning);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const shiftCountPerMedewerker = getShiftCountPerMedewerker(planning);
 
   useEffect(() => {
     async function fetchGegevens() {
@@ -55,21 +55,18 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
       opmerking: data?.opmerking || null
     }));
 
-    const medewerkersMetKleur = gegenereerd
-      
-      .map(m => {
-        const ingepland = shiftCountPerMedewerker[m.naam.toLowerCase()] || 0;
-        let statusKleur = "";
-        if (ingepland > m.maxShifts) statusKleur = "bg-red-200";
-        else if (ingepland < m.maxShifts) statusKleur = "bg-yellow-100";
-        else statusKleur = "bg-green-100";
-        return { ...m, statusKleur };
-      });
+    const medewerkersMetKleur = tegenereerd.map(m => {
+      const ingepland = shiftCountPerMedewerker[m.naam.toLowerCase()] || 0;
+      let statusKleur = "";
+      if (ingepland > m.maxShifts) statusKleur = "bg-red-200";
+      else if (ingepland < m.maxShifts) statusKleur = "bg-yellow-100";
+      else statusKleur = "bg-green-100";
+      return { ...m, statusKleur };
+    });
     setMedewerkers(medewerkersMetKleur);
     setIsLoaded(true);
   }, [localBeschikbaarheid]);
 
-  
   async function opslaanNaarR2() {
     const bestanden = [
       { naam: "planning.json", inhoud: planning },
@@ -88,23 +85,22 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
     alert("✅ Alles succesvol opgeslagen naar R2!");
   }
 
-if (!isLoaded && medewerkers.length === 0) {
-  return (
-    <div className="p-4">
-      <div className="text-gray-500 mb-4">⏳ Bezig met laden... of nog geen gegevens gevonden.</div>
-            <div className="flex flex-wrap gap-2 items-center mb-4">
-        {importeerBeschikbaarheidKnop(setLocalBeschikbaarheid, setMedewerkers)}
-        {React.cloneElement(importeerLoonkostenKnop(setLoonkostenPerUur), {
-          className: "bg-blue-600 text-white px-4 py-2 rounded shadow"
-        })}
-        <button onClick={opslaanNaarR2} className="bg-indigo-600 text-white px-4 py-2 rounded shadow">
-          💾 Opslaan naar Cloudflare R2
-        </button>
+  if (!isLoaded && medewerkers.length === 0) {
+    return (
+      <div className="p-4">
+        <div className="text-gray-500 mb-4">⏳ Bezig met laden... of nog geen gegevens gevonden.</div>
+        <div className="flex flex-wrap gap-2 items-center mb-4">
+          {importeerBeschikbaarheidKnop(setLocalBeschikbaarheid, setMedewerkers)}
+          {React.cloneElement(importeerLoonkostenKnop(setLoonkostenPerUur), {
+            className: "bg-blue-600 text-white px-4 py-2 rounded shadow"
+          })}
+          <button onClick={opslaanNaarR2} className="bg-indigo-600 text-white px-4 py-2 rounded shadow">
+            💾 Opslaan naar Cloudflare R2
+          </button>
+        </div>
       </div>
-    </div>
-  );
-}
-
+    );
+  }
 
   return (
     <div className="p-4 bg-gray-100">
