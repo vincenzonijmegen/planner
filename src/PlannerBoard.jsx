@@ -214,7 +214,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
                           fontWeight: "bold"
                         }}
                         onClick={() => {
-                          const entry = planning[m.naam]?.[dag]?.[shift];
+                          const entry = planning[naamKey]?.[dag]?.[shift];
                           if (entry) {
                             setPlanning((prev) => {
                               const nieuw = { ...prev };
