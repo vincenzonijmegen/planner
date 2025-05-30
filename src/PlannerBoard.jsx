@@ -74,12 +74,8 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
     let totaal = 0;
 
     for (const naam in planning) {
-      const medewerkerData =
-        localBeschikbaarheid?.[naam] ??
-        localBeschikbaarheid?.[naam.trim()] ??
-        localBeschikbaarheid?.[naam.trim().toLowerCase()];
-
-      const leeftijd = medewerkerData?.leeftijd ?? 18;
+      const medewerker = medewerkers.find((m) => m.naam === naam);
+      const leeftijd = medewerker?.leeftijd ?? 18;
       const uurloon = loonkostenPerUur[leeftijd] ?? 15;
 
       for (const dag in planning[naam]) {
@@ -94,7 +90,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
     }
 
     setTotaleLoonkosten(totaal);
-  }, [planning, loonkostenPerUur, localBeschikbaarheid]);
+  }, [planning, loonkostenPerUur, medewerkers]);
 
   async function opslaanNaarR2() {
     const bestanden = [
