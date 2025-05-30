@@ -278,28 +278,13 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
       <div className="grid grid-cols-3 gap-2">
         {["schepper", "ijsbereider", "ijsvoorbereider"].flatMap((functie) =>
           ["vast", "standby", "laat"].map((soort) => {
-            let kleur = "";
-            let label = "";
-
-            if (functie === "ijsbereider") {
-              kleur = soort === "vast" ? "bg-blue-900 text-white" : soort === "standby" ? "bg-blue-600 text-white" : "bg-blue-300 text-black";
-              label = soort === "vast" ? "bereider" : soort === "standby" ? "⏱️ bereider" : "🌙 bereider";
-            }
-
-            if (functie === "ijsvoorbereider") {
-              kleur = soort === "vast" ? "bg-green-900 text-white" : soort === "standby" ? "bg-green-600 text-white" : "bg-green-300 text-black";
-              label = soort === "vast" ? "prep" : soort === "standby" ? "⏱️ prep" : "🌙 prep";
-            }
-
-            if (functie === "schepper") {
-              kleur = soort === "vast" ? "bg-slate-700 text-white" : soort === "standby" ? "bg-slate-500 text-white" : "bg-slate-300 text-black";
-              label = soort === "vast" ? "schep" : soort === "standby" ? "⏱️ schep" : "🌙 schep";
-            }
+            const kleur = kleurSchema[functie]?.[soort];
+            const label = soort === "standby" ? `⏱️ ${functie}` : soort === "laat" ? `🌙 ${functie}` : functie;
 
             return (
               <button
                 key={`${functie}-${soort}`}
-                className={`${kleur} px-3 py-2 rounded font-medium text-sm`}
+                className={`${kleur.tailwind} px-3 py-2 rounded font-medium text-sm`}
                 onClick={() => {
                   const { medewerker, dag, shift } = popup;
                   setPlanning((prev) => {
@@ -327,6 +312,6 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
     </div>
   </div>
 )}
-</div>
+    </div>
   );
 }
