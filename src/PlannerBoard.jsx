@@ -136,28 +136,28 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
         </thead>
 
         <tbody>
-          <tr className="bg-blue-50 font-semibold">
-            <td className="border px-4 py-1 text-right italic">€ per shift:</td>
-            {dagen.map((dag) =>
-              shifts.map((shift) => {
-                const totaal = medewerkers.reduce((som, m) => {
-                  const naamKey = m.naam.trim().toLowerCase();
-                  const entry = planning[naamKey]?.[dag]?.[shift];
-                  if (!entry) return som;
-                  const uren = (entry.soort === "standby" || entry.soort === "laat") ? 4 : 6;
-                  const leeftijd = typeof m.leeftijd === "number" ? m.leeftijd : 18;
-                  const uurloon = loonkostenPerUur[leeftijd] ?? 15;
-                  return som + uren * uurloon;
-                }, 0);
-                return (
-                  <td key={`loonkosten-${dag}-${shift}`} className="border px-1 py-1 text-center text-gray-700">
-                    € {Math.round(totaal)}
-                  </td>
-                );
-              })
-            )}
-            <td className="border bg-gray-100" />
-          </tr>
+          <tr className="bg-yellow-100 font-semibold">
+  <td className="border px-4 py-1 text-right italic font-bold">€ per shift:</td>
+  {dagen.map((dag) =>
+    shifts.map((shift) => {
+      const totaal = medewerkers.reduce((som, m) => {
+        const naamKey = m.naam.trim().toLowerCase();
+        const entry = planning[naamKey]?.[dag]?.[shift];
+        if (!entry) return som;
+        const uren = (entry.soort === "standby" || entry.soort === "laat") ? 4 : 6;
+        const leeftijd = typeof m.leeftijd === "number" ? m.leeftijd : 18;
+        const uurloon = loonkostenPerUur[leeftijd] ?? 15;
+        return som + uren * uurloon;
+      }, 0);
+      return (
+        <td key={`loonkosten-${dag}-${shift}`} className="border px-1 py-1 text-center text-gray-800 font-bold bg-yellow-50">
+          € {Math.round(totaal)}
+        </td>
+      );
+    })
+  )}
+  <td className="border bg-gray-100" />
+</tr>
 
           {medewerkers.map((m) => {
             const naamKey = m.naam.trim().toLowerCase();
