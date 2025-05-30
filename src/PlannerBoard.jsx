@@ -77,7 +77,8 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
 
       const perPersoon = dagen.reduce((dagSom, dag) => {
         return dagSom + shifts.reduce((shiftSom, shift) => {
-          const entry = planning[m.naam]?.[dag]?.[shift];
+          const naamKey = m.naam.trim().toLowerCase();
+const entry = planning[naamKey]?.[dag]?.[shift];
           if (!entry) return shiftSom;
           let uren = entry.soort === "standby" || entry.soort === "laat" ? 4 : 6;
           return shiftSom + uren * uurloon;
