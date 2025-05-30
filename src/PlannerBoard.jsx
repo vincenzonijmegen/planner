@@ -22,8 +22,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
   const [popup, setPopup] = useState(null);
   const [localBeschikbaarheid, setLocalBeschikbaarheid] = useState(beschikbaarheidProp);
   const [medewerkers, setMedewerkers] = useState([]);
-  const [teamFilter, setTeamFilter] = useState(null);
-  const [isLoaded, setIsLoaded] = useState(false);
+    const [isLoaded, setIsLoaded] = useState(false);
   const [totaleLoonkosten, setTotaleLoonkosten] = useState(0);
   const shiftCountPerMedewerker = getShiftCountPerMedewerker(planning);
 
@@ -58,7 +57,7 @@ export default function PlannerBoard({ beschikbaarheid: beschikbaarheidProp }) {
     }));
 
     const medewerkersMetKleur = gegenereerd
-      .filter(m => !teamFilter || m.teamkleur === teamFilter)
+      
       .map(m => {
         const ingepland = shiftCountPerMedewerker[m.naam.toLowerCase()] || 0;
         let statusKleur = "";
