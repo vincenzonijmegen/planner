@@ -144,27 +144,29 @@ useEffect(() => {
   <td className="border px-2 py-1 text-right italic font-bold">Ingepland:</td>
   {dagen.map((dag) =>
     shifts.map((shift) => {
-      const functies = {};
+      const functies = { schepper: 0, ijsbereider: 0, ijsvoorbereider: 0 };
       medewerkers.forEach((m) => {
         const naamKey = m.naam.trim().toLowerCase();
         const entry = planning[naamKey]?.[dag]?.[shift];
-        if (entry) {
-          functies[entry.functie] = (functies[entry.functie] || 0) + 1;
+        if (entry && functies.hasOwnProperty(entry.functie)) {
+          functies[entry.functie]++;
         }
       });
 
       const totaal = Object.values(functies).reduce((a, b) => a + b, 0);
-      const inhoud = Object.entries(functies)
-        .map(([functie, aantal]) => `${functie[0].toUpperCase()}${functie.slice(1)}: ${aantal}`)
-        .join(" / ");
+      const inhoud = [];
+      if (functies.schepper > 0) inhoud.push(`S: ${functies.schepper}`);
+      if (functies.ijsbereider > 0) inhoud.push(`B: ${functies.ijsbereider}`);
+      if (functies.ijsvoorbereider > 0) inhoud.push(`P: ${functies.ijsvoorbereider}`);
 
       return (
         <td
           key={`dagtotaal-${dag}-${shift}`}
-          className="border px-1 py-1 text-center text-gray-800 bg-blue-50"
-          title={`${inhoud}\nTotaal: ${totaal}`}
+          className="border px-1 py-1 text-center text-gray-800 bg-blue-50 leading-tight"
+          title={`Totaal: ${totaal}`}
         >
-          {totaal}
+          {inhoud.join(" / ")}
+          <div className="text-[10px] font-normal text-gray-500">∑ {totaal}</div>
         </td>
       );
     })
