@@ -143,7 +143,7 @@ useEffect(() => {
         {["schepper", "ijsbereider", "ijsvoorbereider"].map((functie) => (
   <tr key={`functie-totaal-${functie}`} className="bg-blue-50 text-[11px] font-medium text-center">
     <td className="border px-2 py-1 text-right italic font-bold">
-      {functie === "schepper" ? "S" : functie === "ijsbereider" ? "B" : "P"}
+      {functie === "schepper" ? "Schepper" : functie === "ijsbereider" ? "IJsbereider" : "Prepper"}
     </td>
     {dagen.map((dag) =>
       shifts.map((shift) => {
