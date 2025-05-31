@@ -140,6 +140,38 @@ useEffect(() => {
         </thead>
 
         <tbody>
+        <tr className="bg-blue-100 text-[11px] font-semibold text-center">
+  <td className="border px-2 py-1 text-right italic font-bold">Ingepland:</td>
+  {dagen.map((dag) =>
+    shifts.map((shift) => {
+      const functies = {};
+      medewerkers.forEach((m) => {
+        const naamKey = m.naam.trim().toLowerCase();
+        const entry = planning[naamKey]?.[dag]?.[shift];
+        if (entry) {
+          functies[entry.functie] = (functies[entry.functie] || 0) + 1;
+        }
+      });
+
+      const totaal = Object.values(functies).reduce((a, b) => a + b, 0);
+      const inhoud = Object.entries(functies)
+        .map(([functie, aantal]) => `${functie[0].toUpperCase()}${functie.slice(1)}: ${aantal}`)
+        .join(" / ");
+
+      return (
+        <td
+          key={`dagtotaal-${dag}-${shift}`}
+          className="border px-1 py-1 text-center text-gray-800 bg-blue-50"
+          title={`${inhoud}\nTotaal: ${totaal}`}
+        >
+          {totaal}
+        </td>
+      );
+    })
+  )}
+  <td className="border bg-gray-100" />
+</tr>
+
           <tr className="bg-yellow-100 font-semibold">
   <td className="border px-4 py-1 text-right italic font-bold">€ per shift:</td>
   {dagen.map((dag) =>
