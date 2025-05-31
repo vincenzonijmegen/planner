@@ -140,33 +140,43 @@ useEffect(() => {
         </thead>
 
         <tbody>
-        <tr className="bg-blue-100 text-[11px] font-semibold text-center">
-  <td className="border px-2 py-1 text-right italic font-bold">Ingepland:</td>
+        {["schepper", "ijsbereider", "ijsvoorbereider"].map((functie) => (
+  <tr key={`functie-totaal-${functie}`} className="bg-blue-50 text-[11px] font-medium text-center">
+    <td className="border px-2 py-1 text-right italic font-bold">
+      {functie === "schepper" ? "S" : functie === "ijsbereider" ? "B" : "P"}
+    </td>
+    {dagen.map((dag) =>
+      shifts.map((shift) => {
+        const aantal = medewerkers.reduce((som, m) => {
+          const naamKey = m.naam.trim().toLowerCase();
+          const entry = planning[naamKey]?.[dag]?.[shift];
+          return entry?.functie === functie ? som + 1 : som;
+        }, 0);
+
+        return (
+          <td key={`${functie}-${dag}-${shift}`} className="border px-1 py-1 text-center text-gray-800">
+            {aantal > 0 ? aantal : ""}
+          </td>
+        );
+      })
+    )}
+    <td className="border bg-gray-100" />
+  </tr>
+))}
+
+<tr className="bg-blue-100 text-[11px] font-bold text-center">
+  <td className="border px-2 py-1 text-right italic">∑</td>
   {dagen.map((dag) =>
     shifts.map((shift) => {
-      const functies = { schepper: 0, ijsbereider: 0, ijsvoorbereider: 0 };
-      medewerkers.forEach((m) => {
+      const totaal = medewerkers.reduce((som, m) => {
         const naamKey = m.naam.trim().toLowerCase();
         const entry = planning[naamKey]?.[dag]?.[shift];
-        if (entry && functies.hasOwnProperty(entry.functie)) {
-          functies[entry.functie]++;
-        }
-      });
-
-      const totaal = Object.values(functies).reduce((a, b) => a + b, 0);
-      const inhoud = [];
-      if (functies.schepper > 0) inhoud.push(`S: ${functies.schepper}`);
-      if (functies.ijsbereider > 0) inhoud.push(`B: ${functies.ijsbereider}`);
-      if (functies.ijsvoorbereider > 0) inhoud.push(`P: ${functies.ijsvoorbereider}`);
+        return entry ? som + 1 : som;
+      }, 0);
 
       return (
-        <td
-          key={`dagtotaal-${dag}-${shift}`}
-          className="border px-1 py-1 text-center text-gray-800 bg-blue-50 leading-tight"
-          title={`Totaal: ${totaal}`}
-        >
-          {inhoud.join(" / ")}
-          <div className="text-[10px] font-normal text-gray-500">∑ {totaal}</div>
+        <td key={`totaal-${dag}-${shift}`} className="border px-1 py-1 text-gray-900 bg-blue-100">
+          {totaal > 0 ? totaal : ""}
         </td>
       );
     })
